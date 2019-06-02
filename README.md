@@ -68,7 +68,8 @@ public class RootScreen extends Screen {
 
     @Override
     public boolean acceptsButtonA() {
-        // Button A will move up to parent screen by default
+        // Button A will move up to parent screen by default (i.e. works as a "cancel" button),
+        // unless this function returns true
         return false;
     }
 
