@@ -3,11 +3,14 @@ Java driver toolkit for the [Adafruit 128x64 OLED bonnet for Raspberry Pi, with 
 
 *This code is not associated with or endorsed by Adafruit. Adafruit is a trademark of Limor "Ladyada" Fried.*
 
-This toolkit has support for drawing text or pixels on the OLED screen and receiving events from the D-pad and buttons. It also includes a UI layout library,
-and some task scheduling classes to make it easy to build an asynchronous application that does not block the screen update thread.
+This toolkit has support for drawing text or pixels on the OLED screen of the bonnet, through the OLED screen's SSD1306 chipset,
+and for receiving events from the D-pad and buttons through the GPIO interface. It also includes a UI layout library, and some
+task scheduling classes to make it easy to build an asynchronous application that does not block the screen update thread.
 
 The code is currently designed only for a text UI, although you can write individual pixels to the display, so you could use a Java rendering library
 to create a `BufferedImage`, and copy the image over to the display a pixel at a time. 
+
+## Simple example
 
 To initialize the OLED screen and button hardware and start the UI, use the following pattern:
 
@@ -101,7 +104,9 @@ public class RootScreen extends Screen {
 }
 ```
 
+## More complex example
 
+For a complete working example of an asynchronous UI application powered by this toolkit, see the [usb-copier](https://github.com/lukehutch/usb-copier) project. 
 
 ### Code used in this project:
 
