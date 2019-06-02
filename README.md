@@ -27,7 +27,7 @@ public static void main(String[] args) throws Exception {
 
 where `RootScreen` extends `Screen`:
 
-```
+```java
 import aobtk.font.Font;
 import aobtk.hw.HWButton;
 import aobtk.ui.element.Menu;
