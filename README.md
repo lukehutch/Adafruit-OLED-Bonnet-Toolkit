@@ -4,6 +4,9 @@ Java toolkit for the [Adafruit 128x64 OLED bonnet with buttons and D-pad](https:
 This toolkit has support for drawing text or pixels on the OLED screen and receiving events from the D-pad and buttons. It also includes a UI layout library,
 and some task scheduling classes to make it easy to build an asynchronous application that does not block the screen update thread.
 
+The code is currently designed only for a text UI, although you can write individual pixels to the display, so you could use a Java rendering library
+to create a `BufferedImage`, and copy the image over to the display a pixel at a time. 
+
 To initialize the OLED screen and button hardware and start the UI, use the following pattern:
 
 ```java
