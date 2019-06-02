@@ -45,6 +45,7 @@ import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
 import aobtk.oled.Display;
 import aobtk.oled.OLEDDriver;
+import aobtk.ui.screen.Screen;
 import aobtk.util.TaskExecutor;
 
 public class Bonnet {
@@ -70,24 +71,22 @@ public class Bonnet {
     /**
      * Initialize the hardwarer bonnet, adding a {@link HWButtonListener} for button events.
      */
-    public static void init(HWButtonListener listener) {
+    public static void init() {
         // Wire up buttons to listener
-        for (HWButton b : HWButton.values()) {
+        for (HWButton button : HWButton.values()) {
             // Provision GPIO pin as an input pin with its internal pull up resistor enabled
-            b.digitalInput = Bonnet.GPIO.provisionDigitalInputPin(b.pin, PinPullResistance.PULL_UP);
+            button.digitalInput = Bonnet.GPIO.provisionDigitalInputPin(button.pin, PinPullResistance.PULL_UP);
 
             // Set shutdown state for this input pin
-            b.digitalInput.setShutdownOptions(true);
+            button.digitalInput.setShutdownOptions(true);
 
             // Register gpio pin listener
-            b.digitalInput.addListener(new GpioPinListenerDigital() {
+            button.digitalInput.addListener(new GpioPinListenerDigital() {
                 @Override
                 public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
-                    boolean buttonDown = event.getState() == PinState.LOW;
-                    buttonDownMap.put(b, buttonDown);
-                    if (listener != null) {
-                        listener.onButtonEvent(b, buttonDown);
-                    }
+                    boolean down = event.getState() == PinState.LOW;
+                    buttonDownMap.put(button, down);
+                    Screen.buttonPressed(button, down);
                 }
             });
         }

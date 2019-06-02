@@ -60,6 +60,16 @@ public class Menu extends UIElement {
         }
     }
 
+    public Menu(Font font, int spacing, boolean hLayout, String... items) {
+        this.font = font;
+        this.spacing = spacing;
+        this.items = new ArrayList<>();
+        this.layout = hLayout ? new HLayout() : new VLayout();
+        for (String item : items) {
+            add(item);
+        }
+    }
+
     public void add(Str... items) {
         for (Str item : items) {
             this.items.add(item);
@@ -142,7 +152,7 @@ public class Menu extends UIElement {
         textElements.clear();
         layout.clear();
     }
-    
+
     public void setHighlightType(Highlight highlightType) {
         this.highlightType = highlightType;
     }
