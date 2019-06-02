@@ -3,7 +3,7 @@ Java driver toolkit for the [Adafruit 128x64 OLED bonnet for Raspberry Pi, with 
 
 *This code is not associated with or endorsed by Adafruit. Adafruit is a trademark of Limor "Ladyada" Fried.*
 
-<p align="center"><a href="https://raw.githubusercontent.com/lukehutch/Adafruit-OLED-Bonnet-Toolkit/master/rpi-assembly.jpg"><img alt="Raspberry Pi hardware assembly" height="752" width = "297" src="https://raw.githubusercontent.com/lukehutch/Adafruit-OLED-Bonnet-Toolkit/master/rpi-assembly.jpg"></a></p>
+<p align="center"><a href="https://raw.githubusercontent.com/lukehutch/Adafruit-OLED-Bonnet-Toolkit/master/rpi-assembly.jpg"><img alt="Raspberry Pi hardware assembly" height="297" width="752" src="https://raw.githubusercontent.com/lukehutch/Adafruit-OLED-Bonnet-Toolkit/master/rpi-assembly.jpg"></a></p>
 
 This toolkit has support for drawing text or pixels on the OLED screen of the bonnet, through the OLED screen's SSD1306 chipset,
 and for receiving events from the D-pad and buttons through the GPIO interface. It also includes a UI layout library, and some
