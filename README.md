@@ -1,8 +1,7 @@
 # Adafruit OLED Bonnet Toolkit
 Java driver toolkit for the [Adafruit 128x64 OLED bonnet for Raspberry Pi, with buttons and D-pad](https://www.adafruit.com/product/3531).
 
-| This code is not associated with or endorsed by Adafruit.<br>Adafruit is a trademark of Limor "Ladyada" Fried.* |
-|-----------------------------|
+*(This code is not associated with or endorsed by Adafruit. Adafruit is a trademark of Limor "Ladyada" Fried.)*
 
 <p align="center"><a href="https://raw.githubusercontent.com/lukehutch/Adafruit-OLED-Bonnet-Toolkit/master/rpi-assembly.jpg"><img alt="Raspberry Pi hardware assembly" height="297" width="752" src="https://raw.githubusercontent.com/lukehutch/Adafruit-OLED-Bonnet-Toolkit/master/rpi-assembly.jpg"></a><br>The OLED bonnet mounted on a Raspberry Pi Zero, which is further mounted on an (optional) Zero4U USB hub.</p>
 
