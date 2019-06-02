@@ -1,5 +1,8 @@
 # Adafruit-OLED-Bonnet-Toolkit
-Java toolkit for the Adafruit 128x64 OLED bonnet, with support for the screen, D-pad/buttons, UI layout, and task scheduling.
+Java toolkit for the [Adafruit 128x64 OLED bonnet with buttons and D-pad](https://www.adafruit.com/product/3531).
+
+This toolkit has support for drawing text or pixels on the OLED screen and receiving events from the D-pad and buttons. It also includes a UI layout library,
+and some task scheduling classes to make it easy to build an asynchronous application that does not block the screen update thread.
 
 To initialize the OLED screen and button hardware, call:
 
@@ -69,8 +72,11 @@ public class RootScreen extends Screen {
         case B:
             // Center button or button B will move to child screen
             if (menu.getSelectedItem().toString().equals("Hello")) {
+                // Open new HelloScreen screen, with this as the parent
+                // (that screen can call goToParentScreen() to return here)
                 setCurrScreen(new HelloScreen(this));
             } else if (menu.getSelectedItem().toString().equals("Goodbye")) {
+                // Open new GoodbyeScreen screen, with this as the parent
                 setCurrScreen(new GoodbyeScreen(this));
             }
             break;
@@ -83,5 +89,6 @@ public class RootScreen extends Screen {
 
 ### Code used in this project:
 
-* OLED driver code and 4x5/5x8 fonts from [Pi-OLED](https://github.com/entrusc/Pi-OLED) by Florian Frankenberger, which is a port of the [Adafruit_SSD1306](https://github.com/adafruit/Adafruit_SSD1306) Python driver for the SSD1306 OLED driver.
+* OLED driver code and 4x5/5x8 fonts from [Pi-OLED](https://github.com/entrusc/Pi-OLED) by Florian Frankenberger, which is a port of
+the [Adafruit_SSD1306](https://github.com/adafruit/Adafruit_SSD1306) Python driver for the SSD1306 OLED driver.
 * [Latin1/Korean 16x16](https://github.com/Dalgona/neodgm/blob/master/font.py) font by Dalgona. 
