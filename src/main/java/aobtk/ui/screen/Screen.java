@@ -154,11 +154,11 @@ public abstract class Screen {
                     }
                 }
 
+                // Open newCurrScreen (any repaint() will be ignored until currScreen is set below)
+                newCurrScreen.open();
+
                 // Set currScreen to newCurrScreen
                 currScreen = newCurrScreen;
-
-                // Open newCurrScreen
-                currScreen.open();
 
                 // Schedule initial repaint of newCurrScreen 
                 repaint();
