@@ -2,10 +2,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<name>USB Copier</name>
-	<description>USB drive copier based on Raspberry Pi Zero</description>
-	<groupId>none</groupId>
-	<artifactId>usb-copier</artifactId>
+	<name>Adafruit OLED Bonnet Toolkit</name>
+	<description>Java toolkit for the Adafruit 128x64 OLED bonnet, with support for the screen, D-pad/buttons, UI layout, and task scheduling</description>
+	<groupId>lukehutch</groupId>
+	<artifactId>adafruit-oled-bonnet-toolkit</artifactId>
 	<version>0.0.1</version>
 	<modelVersion>4.0.0</modelVersion>
 	<packaging>jar</packaging>
