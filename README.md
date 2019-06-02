@@ -1,5 +1,5 @@
 # Adafruit OLED Bonnet Toolkit
-Java toolkit for the [Adafruit 128x64 OLED bonnet with buttons and D-pad](https://www.adafruit.com/product/3531).
+Java toolkit for the [Adafruit 128x64 OLED bonnet for Raspberry Pi, with buttons and D-pad](https://www.adafruit.com/product/3531).
 
 This toolkit has support for drawing text or pixels on the OLED screen and receiving events from the D-pad and buttons. It also includes a UI layout library,
 and some task scheduling classes to make it easy to build an asynchronous application that does not block the screen update thread.
