@@ -4,7 +4,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<name>Adafruit OLED Bonnet Toolkit</name>
 	<description>Java toolkit for the Adafruit 128x64 OLED bonnet, with support for the screen, D-pad/buttons, UI layout, and task scheduling</description>
-	<groupId>lukehutch</groupId>
+	<groupId>aobtk</groupId>
 	<artifactId>adafruit-oled-bonnet-toolkit</artifactId>
 	<version>0.0.1</version>
 	<modelVersion>4.0.0</modelVersion>
