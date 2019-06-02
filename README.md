@@ -17,6 +17,15 @@ task scheduling classes to make it easy to build an asynchronous application tha
 The code is currently designed only for a text UI, although you can write individual pixels to the display, so you could use a Java rendering library
 to create a `BufferedImage`, and copy the image over to the display a pixel at a time. 
 
+## Raspberry Pi config
+
+Make sure your `/boot/config.txt` file contains the following two lines (to enable I2C, and increase the baudrate to 1Mbaud, to dramatically increase the display update rate).
+
+```
+dtparam=i2c_arm=on
+dtparam=i2c_baudrate=1000000
+```
+
 ## Simple example
 
 To initialize the OLED screen and button hardware and start the UI, use the following pattern:
