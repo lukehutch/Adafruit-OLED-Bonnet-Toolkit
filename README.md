@@ -7,11 +7,10 @@ To initialize the OLED screen and button hardware, call:
 Bonnet.init();
 ```
 
-To set up the UI, do the following:
+To set up the UI and start drawing, do the following:
 
 ```
-Screen rootScreen = new RootScreen();
-Screen.init(rootScreen);
+Screen.init(new RootScreen());
 ```
 
 where `RootScreen` extends `Screen`:
