@@ -5,6 +5,11 @@ Java driver toolkit for the [Adafruit 128x64 OLED bonnet for Raspberry Pi, with 
 
 <p align="center"><a href="https://raw.githubusercontent.com/lukehutch/Adafruit-OLED-Bonnet-Toolkit/master/rpi-assembly.jpg"><img alt="Raspberry Pi hardware assembly" height="297" width="752" src="https://raw.githubusercontent.com/lukehutch/Adafruit-OLED-Bonnet-Toolkit/master/rpi-assembly.jpg"></a><br><i>Hardware assembly: The OLED bonnet mounted on a Raspberry Pi Zero,<br>which is further mounted on an (optional) Zero4U USB hub.</i></p>
 
+<p align="center"><a href="https://raw.githubusercontent.com/lukehutch/usb-copier/master/screen-en.jpg"><img alt="USB copier screenshot, English" width="375" height="280" src="https://raw.githubusercontent.com/lukehutch/usb-copier/master/screen-en.jpg"></a>&nbsp;<a href="https://raw.githubusercontent.com/lukehutch/usb-copier/master/screen-en.jpg"><img alt="USB copier screenshot, Korean" width="375" height="280" src="https://raw.githubusercontent.com/lukehutch/usb-copier/master/screen-ko.jpg"></a>
+<br><i>The [USB copier demo application](https://github.com/lukehutch/usb-copier), showing highlighted menus arranged<br>
+arranged using the layout system, and limited support for internationalization (Latin1 and Korean fonts included).</i></p>
+
+
 This toolkit has support for drawing text or pixels on the OLED screen of the bonnet, through the OLED screen's SSD1306 chipset,
 and for receiving events from the D-pad and buttons through the GPIO interface. It also includes a UI layout library, and some
 task scheduling classes to make it easy to build an asynchronous application that does not block the screen update thread.
