@@ -25,7 +25,7 @@ public static void main(String[] args) throws Exception {
 }
 ```
 
-where `RootScreen` extends `Screen`:
+where `RootScreen` extends `Screen`, which is a display controller for a single tree of UI elements (similar to an `Activity` in Android):
 
 ```java
 import aobtk.font.Font;
@@ -46,6 +46,7 @@ public class RootScreen extends Screen {
 
     @Override
     public void open() {
+    	// Set up UI when screen opens
         VLayout layout = new VLayout();
 
         layout.add(new TextElement(Font.FONT_5X8, "Hello World"), VAlign.TOP);
