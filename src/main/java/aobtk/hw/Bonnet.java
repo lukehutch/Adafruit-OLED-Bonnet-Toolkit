@@ -107,19 +107,35 @@ public class Bonnet {
         // Remove button listeners
         for (HWButton b : HWButton.values()) {
             if (b.digitalInput != null) {
-                b.digitalInput.removeAllListeners();
+                try {
+                    b.digitalInput.removeAllListeners();
+                } catch (Exception e) {
+                    // Ignore
+                }
                 b.digitalInput = null;
             }
         }
 
-        // Stop writing to display before shutting down the display hardware
-        display.shutdown();
-
-        // Shut down display
-        oledDriver.shutdown();
-
         // Stop all GPIO activity/threads by shutting down the GPIO controller
         // (forcefully shuts down all GPIO monitoring threads and scheduled tasks)
-        GPIO.shutdown();
+        try {
+            GPIO.shutdown();
+        } catch (Exception e) {
+            // Ignore
+        }
+
+        // Stop writing to display before shutting down the display hardware
+        try {
+            display.shutdown();
+        } catch (Exception e) {
+            // Ignore
+        }
+
+        // Shut down display
+        try {
+            oledDriver.shutdown();
+        } catch (Exception e) {
+            // Ignore
+        }
     }
 }
