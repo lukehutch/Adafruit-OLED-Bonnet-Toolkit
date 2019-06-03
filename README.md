@@ -39,3 +39,4 @@ For a complete working example of an asynchronous UI application powered by this
 * OLED driver code and 4x5/5x8 fonts from [Pi-OLED](https://github.com/entrusc/Pi-OLED) by Florian Frankenberger, which is a port of
 the [Adafruit_SSD1306](https://github.com/adafruit/Adafruit_SSD1306) Python driver for the SSD1306 OLED driver.
 * [Latin1/Korean 16x16](https://github.com/Dalgona/neodgm/blob/master/font.py) font by Dalgona. 
+* [WenQuanYi Song](http://wenq.org/wqy2/index.cgi?BitmapSong_en) Unicode bitmap font for Latin1, unified CJK ideographs, and Hangeul.
