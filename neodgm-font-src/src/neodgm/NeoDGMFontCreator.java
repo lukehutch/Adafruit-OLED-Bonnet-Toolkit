@@ -158,7 +158,8 @@ public class NeoDGMFontCreator {
         }
 
         // Output result
-        try (FileOutputStream fos = new FileOutputStream("src/main/resources/neodgm-font");
+        new File("src/main/resources/fonts").mkdir();
+        try (FileOutputStream fos = new FileOutputStream("src/main/resources/fonts/neodgm-font");
                 BufferedOutputStream bos = new BufferedOutputStream(fos);
                 DataOutputStream out = new DataOutputStream(bos)) {
             int numChars = charDefs.size();

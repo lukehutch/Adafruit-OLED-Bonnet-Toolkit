@@ -55,13 +55,18 @@ class NeoDGMFont extends Font {
     private static final int PADDING_X = 0;
     private static final int PADDING_Y = 0;
 
+    private static final String FONT_RESOURCE_PATH = "fonts/neodgm-font";
+
     static final Font FONT_NEODGM = new NeoDGMFont();
 
     private NeoDGMFont() {
         super(/* height = */ 16, /* outerHeight = */ 16 + PADDING_Y);
 
         // Read font file created by NeoDGMFontCreator.java
-        URL url = NeoDGMFont.class.getClassLoader().getResource("neodgm-font");
+        URL url = NeoDGMFont.class.getClassLoader().getResource(FONT_RESOURCE_PATH);
+        if (url == null) {
+            throw new RuntimeException("Resource " + FONT_RESOURCE_PATH + " not found");
+        }
         try (InputStream is = url.openStream();
                 BufferedInputStream bis = new BufferedInputStream(is);
                 DataInputStream in = new DataInputStream(bis)) {
