@@ -46,7 +46,7 @@ import aobtk.font.FontChar;
 
 import java.util.TreeMap;
 
-public class SaveableFont extends Font {
+class SaveableFont extends Font {
     /**
      * Initialize the font from a map. All characters should already be present in the map, since the characters
      * will be measured immediately.
