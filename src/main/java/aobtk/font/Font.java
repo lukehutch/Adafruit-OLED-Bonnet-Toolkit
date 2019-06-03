@@ -31,149 +31,311 @@
  */
 package aobtk.font;
 
-import java.util.List;
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
-import aobtk.oled.Display;
-import aobtk.oled.Display.Highlight;
-import aobtk.ui.measurement.Size;
+import aobtk.font.FontStyle.CharSpacing;
 
-/**
- *
- * @author Luke Hutchison
- * 
- */
-public abstract class Font {
+public class Font {
+    /** The characters in the font. */
+    protected Map<Character, FontChar> charToFontChar;
 
-    protected final int height, outerHeight;
+    /** The height of the tallest character in the font. */
+    private int maxCharHeight;
 
-    public static final Font FONT_4X5 = MonospaceFont.FONT_4X5;
-    public static final Font FONT_5X8 = MonospaceFont.FONT_5X8;
-    public static final Font FONT_NEODGM = NeoDGMFont.FONT_NEODGM;
+    /** The width of the widest character in the font. */
+    private int maxCharWidth;
 
-    protected Font(int height, int outerHeight) {
-        this.height = height;
-        this.outerHeight = outerHeight;
+    /** The default font style for this font. */
+    private final FontStyle defaultStyle = new FontStyle(this);
+
+    // -----------------------------------------------------------------------------------------------------------
+
+    // Lazy-loaded font singletons:
+    // https://www.journaldev.com/1377/java-singleton-design-pattern-best-practices-examples#lazy-initialization
+
+    /**
+     * <a href="https://github.com/Dalgona/neodgm">NeoDGM</a> font, with support for
+     * <a href="https://dalgona.github.io/neodgm/">Latin1, Hangeul, box drawing characters and Braille</a>. Latin1
+     * characters have size 16x8 and Hangeul characters have size 16x16.
+     */
+    public static Font NeoDGM_16() {
+        return NeoDGM_16.FONT;
     }
 
-    public abstract int getWidth(char chr);
-
-    public abstract int getOuterWidth(char chr);
-
-    public int getOuterWidth(String str) {
-        int outerWidth = 0;
-        for (int i = 0; i < str.length(); i++) {
-            outerWidth += getOuterWidth(str.charAt(i));
-        }
-        return outerWidth;
+    private static class NeoDGM_16 {
+        // Korean chars are 16x16, other chars are designed for 16x8, so respect nominal spacing by default 
+        private static final Font FONT = new Font("fonts/neodgm-16-font");
+        // With nominal character spacing, there are already appropriate gaps between pixels (no extra padding needed) 
+        // Don't pad Y, since 16 pixels high fits 4 rows on a 48 pixel row display
     }
 
-    public int getHeight() {
-        return height;
+    /** Basic 4x5 ASCII font (uppercase only). */
+    public static Font PiOLED_4x5() {
+        return PiOLED_4x5.FONT;
     }
 
-    public int getOuterHeight() {
-        return outerHeight;
-    }
-
-    /** Draw a character, and return the width of the character, including any padding. */
-    protected abstract int renderChar(char c, int x, int y, int maxW, int maxH, boolean on, Highlight highlight,
-            Display display);
-
-    /** Draw a character, and return outer width of the character. */
-    public int drawChar(char c, int x, int y, int maxW, int maxH, boolean on, Highlight highlight,
-            Display display) {
-        if (maxW > 0 && maxH > 0) {
-            int width = renderChar(c, x, y, maxW, maxH, on, highlight, display);
-            if (highlight == Highlight.BLOCK) {
-                display.invertBlock(x - 1, y - 1, Math.min(maxW, getWidth(c)) + 2, Math.min(maxH, getHeight()) + 2);
-            }
-            return width;
-        } else {
-            return 0;
+    private static class PiOLED_4x5 {
+        private static final Font FONT = new Font("fonts/pi-oled-4x5-font");
+        static {
+            // This font is illegible if not paded in both X and Y by default
+            FONT.defaultStyle.setPadX(1);
+            FONT.defaultStyle.setPadY(1);
         }
     }
 
-    /** Draw a character, and return the outer width of the character. */
-    public int drawChar(char c, int x, int y, Display display) {
-        return drawChar(c, x, y, getWidth(c), getHeight(), /* on = */ true, Highlight.NONE, display);
+    /** Basic 5x8 IBM-437 font. */
+    public static Font PiOLED_5x8() {
+        return PiOLED_5x8.FONT;
+    }
+
+    private static class PiOLED_5x8 {
+        private static final Font FONT = new Font("fonts/pi-oled-5x8-font");
+        static {
+            // Need to pad X, but this font is designed to be compact, so don't pad Y by default
+            FONT.defaultStyle.setPadX(1);
+        }
     }
 
     /**
-     * Draw a string (splitting into lines at the newline character), and return the width and height of the drawn
-     * area, in pixels.
+     * <a href="http://wenq.org/wqy2/index.cgi?BitmapSong_en">WenQueanYi Song</a> 12x12 font, supporting many
+     * Unicode characters, and CJK unified ideographs, but not Hangeul (only {@link Font#WenQuanYi_16()} and
+     * {@link Font#WenQuanYi_16_bold()} support Hangeul).
      */
-    public Size drawString(String string, int x, int y, int maxW, int maxH, boolean on, Highlight highlight,
-            Display display) {
-        int posX = x;
-        int posY = y;
-        int maxX = x + maxW;
-        int maxY = y + maxH;
-        int renderW = 0;
-        int renderH = 0;
-        int outerHeight = getOuterHeight();
-        for (int i = 0; i < string.length(); i++) {
-            char c = string.charAt(i);
-            if (c == '\n') {
-                posX = x;
-                posY += outerHeight;
-            } else {
-                posX += drawChar(c, posX, posY, Math.max(0, maxX - posX), Math.max(0, maxY - posY), on, highlight,
-                        display);
-                // Only non-whitespace characters affect max width and max height
-                // (this handles a terminal space or newline without increasing the bounding box)
-                if (c != ' ') {
-                    renderW = Math.max(renderW, posX - x);
-                    renderH = Math.max(renderH, posY + outerHeight - y);
+    public static Font WenQuanYi_12() {
+        return WenQuanYi_12.FONT;
+    }
+
+    private static class WenQuanYi_12 {
+        private static final Font FONT = new Font("fonts/wqy-12-font");
+        static {
+            // Make this font proportional, otherwise Latin1 chars are spaced way too far apart
+            FONT.defaultStyle.setCharSpacing(CharSpacing.PROPORTIONAL);
+            FONT.defaultStyle.setPadX(1);
+            FONT.defaultStyle.setPadY(1);
+        }
+    }
+
+    /**
+     * <a href="http://wenq.org/wqy2/index.cgi?BitmapSong_en">WenQueanYi Song</a> 12x12 bold font, supporting many
+     * Unicode characters, and CJK unified ideographs, but not Hangeul (only {@link Font#WenQuanYi_16()} and
+     * {@link Font#WenQuanYi_16_bold()} support Hangeul).
+     */
+    public static Font WenQuanYi_12_bold() {
+        return WenQuanYi_12_bold.FONT;
+    }
+
+    private static class WenQuanYi_12_bold {
+        private static final Font FONT = new Font("fonts/wqy-12-bold-font");
+        static {
+            // Make this font proportional, otherwise Latin1 chars are spaced way too far apart
+            FONT.defaultStyle.setCharSpacing(CharSpacing.PROPORTIONAL);
+            FONT.defaultStyle.setPadX(1);
+            FONT.defaultStyle.setPadY(1);
+        }
+    }
+
+    /**
+     * <a href="http://wenq.org/wqy2/index.cgi?BitmapSong_en">WenQueanYi Song</a> 13x13 font, supporting many
+     * Unicode characters, and CJK unified ideographs, but not Hangeul (only {@link Font#WenQuanYi_16()} and
+     * {@link Font#WenQuanYi_16_bold()} support Hangeul).
+     */
+    public static Font WenQuanYi_13() {
+        return WenQuanYi_13.FONT;
+    }
+
+    private static class WenQuanYi_13 {
+        private static final Font FONT = new Font("fonts/wqy-13-font");
+        static {
+            // Make this font proportional, otherwise Latin1 chars are spaced way too far apart
+            FONT.defaultStyle.setCharSpacing(CharSpacing.PROPORTIONAL);
+            FONT.defaultStyle.setPadX(1);
+            FONT.defaultStyle.setPadY(1);
+        }
+    }
+
+    /**
+     * <a href="http://wenq.org/wqy2/index.cgi?BitmapSong_en">WenQueanYi Song</a> 13x13 bold font, supporting many
+     * Unicode characters, and CJK unified ideographs, but not Hangeul (only {@link Font#WenQuanYi_16()} and
+     * {@link Font#WenQuanYi_16_bold()} support Hangeul).
+     */
+    public static Font WenQuanYi_13_bold() {
+        return WenQuanYi_13_bold.FONT;
+    }
+
+    private static class WenQuanYi_13_bold {
+        private static final Font FONT = new Font("fonts/wqy-13-bold-font");
+        static {
+            // Make this font proportional, otherwise Latin1 chars are spaced way too far apart
+            FONT.defaultStyle.setCharSpacing(CharSpacing.PROPORTIONAL);
+            FONT.defaultStyle.setPadX(1);
+            FONT.defaultStyle.setPadY(1);
+        }
+    }
+
+    /**
+     * <a href="http://wenq.org/wqy2/index.cgi?BitmapSong_en">WenQueanYi Song</a> 15x15 font, supporting many
+     * Unicode characters, and CJK unified ideographs, but not Hangeul (only {@link Font#WenQuanYi_16()} and
+     * {@link Font#WenQuanYi_16_bold()} support Hangeul).
+     */
+    public static Font WenQuanYi_15() {
+        return WenQuanYi_15.FONT;
+    }
+
+    private static class WenQuanYi_15 {
+        private static final Font FONT = new Font("fonts/wqy-15-font");
+        static {
+            // Make this font proportional, otherwise Latin1 chars are spaced way too far apart
+            FONT.defaultStyle.setCharSpacing(CharSpacing.PROPORTIONAL);
+            FONT.defaultStyle.setPadX(1);
+            FONT.defaultStyle.setPadY(1);
+        }
+    }
+
+    /**
+     * <a href="http://wenq.org/wqy2/index.cgi?BitmapSong_en">WenQueanYi Song</a> 15x15 bold font, supporting many
+     * Unicode characters, and CJK unified ideographs, but not Hangeul (only {@link Font#WenQuanYi_16()} and
+     * {@link Font#WenQuanYi_16_bold()} support Hangeul).
+     */
+    public static Font WenQuanYi_15_bold() {
+        return WenQuanYi_15_bold.FONT;
+    }
+
+    private static class WenQuanYi_15_bold {
+        private static final Font FONT = new Font("fonts/wqy-15-bold-font");
+        static {
+            // Make this font proportional, otherwise Latin1 chars are spaced way too far apart
+            FONT.defaultStyle.setCharSpacing(CharSpacing.PROPORTIONAL);
+            FONT.defaultStyle.setPadX(1);
+            FONT.defaultStyle.setPadY(1);
+        }
+    }
+
+    public static Font WenQuanYi_16() {
+        return WenQuanYi_16.FONT;
+    }
+
+    /**
+     * <a href="http://wenq.org/wqy2/index.cgi?BitmapSong_en">WenQueanYi Song</a> 16x16 font, supporting many
+     * Unicode characters, CJK unified ideographs, and Hangeul.
+     */
+    private static class WenQuanYi_16 {
+        private static final Font FONT = new Font("fonts/wqy-16-font");
+        static {
+            // Make this font proportional, otherwise Latin1 chars are spaced way too far apart
+            FONT.defaultStyle.setCharSpacing(CharSpacing.PROPORTIONAL);
+            FONT.defaultStyle.setPadX(1);
+            // Don't pad Y, since 16 pixels high fits 4 rows on a 48 pixel row display
+        }
+    }
+
+    public static Font WenQuanYi_16_bold() {
+        return WenQuanYi_16_bold.FONT;
+    }
+
+    /**
+     * <a href="http://wenq.org/wqy2/index.cgi?BitmapSong_en">WenQueanYi Song</a> 16x16 bold font, supporting many
+     * Unicode characters, CJK unified ideographs, and Hangeul.
+     */
+    private static class WenQuanYi_16_bold {
+        private static final Font FONT = new Font("fonts/wqy-16-bold-font");
+        static {
+            // Make this font proportional, otherwise Latin1 chars are spaced way too far apart
+            FONT.defaultStyle.setCharSpacing(CharSpacing.PROPORTIONAL);
+            FONT.defaultStyle.setPadX(1);
+            // Don't pad Y, since 16 pixels high fits 4 rows on a 48 pixel row display
+        }
+    }
+
+    // -----------------------------------------------------------------------------------------------------------
+
+    /**
+     * Initialize the font from a map. All characters should already be present in the map, since the characters
+     * will be measured immediately.
+     */
+    protected Font(Map<Character, FontChar> charToCharInfo) {
+        this.charToFontChar = charToCharInfo;
+        measureFont();
+    }
+
+    /** Load the font from disk. */
+    public Font(String path) {
+        try {
+            URL url = Font.class.getClassLoader().getResource(path);
+            if (url == null) {
+                throw new FileNotFoundException(path);
+            }
+            try (InputStream is = url.openStream();
+                    BufferedInputStream bis = new BufferedInputStream(is);
+                    DataInputStream in = new DataInputStream(bis)) {
+                int numChars = in.readInt();
+                charToFontChar = new HashMap<>(numChars);
+                int totPixBitsLen = 0;
+                for (int i = 0; i < numChars; i++) {
+                    char c = in.readChar();
+                    int x = in.readByte() & 0xff;
+                    int y = in.readByte() & 0xff;
+                    int w = in.readByte() & 0xff;
+                    int h = in.readByte() & 0xff;
+                    int nominalWidth = in.readByte() & 0xff;
+                    int byteOffset = in.readInt();
+                    FontChar charInfo = new FontChar(x, y, w, h, nominalWidth, byteOffset);
+                    charToFontChar.put(c, charInfo);
+                    totPixBitsLen += charInfo.getCharPixBitsLen();
+                }
+                byte[] allPixBits = new byte[totPixBitsLen];
+                for (int off = 0, remaining = totPixBitsLen; remaining > 0;) {
+                    int numRead = in.read(allPixBits, off, remaining);
+                    if (numRead <= 0) {
+                        throw new IOException("Premature EOF");
+                    }
+                    remaining -= numRead;
+                }
+                for (FontChar charInfo : charToFontChar.values()) {
+                    charInfo.setPixBits(allPixBits);
                 }
             }
+            measureFont();
+        } catch (IOException e) {
+            throw new RuntimeException("Could not load font " + path, e);
         }
-        return new Size(Math.min(renderW, maxW), Math.min(renderH, maxH));
     }
 
-    /**
-     * Draw a string (splitting into lines at the newline character), and return the width and height of the drawn
-     * area, in pixels.
-     */
-    public Size drawString(String string, int x, int y, boolean on, Highlight highlight, Display display) {
-        return drawString(string, x, y, getOuterWidth(string), getHeight(), on, highlight, display);
+    protected void measureFont() {
+        for (FontChar fontChar : charToFontChar.values()) {
+            fontChar.measure();
+            maxCharWidth = Math.max(maxCharWidth, fontChar.measuredW);
+            maxCharHeight = Math.max(maxCharHeight, fontChar.measuredH);
+        }
     }
 
-    /**
-     * Draw a string (splitting into lines at the newline character), and return the width and height of thed rawn
-     * area, in pixels.
-     */
-    public Size drawString(String string, int x, int y, Display display) {
-        return drawString(string, x, y, getOuterWidth(string), getHeight(), /* on = */ true, Highlight.NONE,
-                display);
+    public int getMaxCharHeight() {
+        return maxCharHeight;
     }
 
-    /**
-     * Draw a list of strings, one per line, additionally splitting each string into lines at newline characters,
-     * and return the width and height of the drawn area, in pixels.
-     */
-    public Size drawLines(List<String> lines, int x, int y, boolean on, Highlight highlight, Display display) {
-        int posY = y;
-        int maxWidth = 0;
-        int maxY = 0;
-        int outerHeight = getOuterHeight();
-        for (String line : lines) {
-            Size size = drawString(line, x, posY, display);
-            maxWidth = Math.max(maxWidth, size.w);
-            // Handle blank lines (if the extent was zero pixels high, set to outerHeight)
-            int lineHeight = Math.max(size.w, outerHeight);
-            posY += lineHeight;
-            if (!line.isBlank()) {
-                maxY = posY;
+    public int getMaxCharWidth() {
+        return maxCharWidth;
+    }
+
+    public FontChar getFontChar(char c) {
+        FontChar fontChar = charToFontChar.get(c);
+        if (fontChar == null) {
+            fontChar = charToFontChar.get('?');
+            if (fontChar == null) {
+                throw new RuntimeException(
+                        "Could not render character '" + c + "' in font, and couldn't find fallback character '?'");
             }
         }
-        return new Size(maxWidth, maxY - y);
+        return fontChar;
     }
 
-    /**
-     * Draw a list of strings, one per line, additionally splitting each string into lines at newline characters,
-     * and return the width and height of the drawn area, in pixels.
-     */
-    public Size drawLines(List<String> lines, int x, int y, Display display) {
-        return drawLines(lines, x, y, /* on = */ true, Highlight.NONE, display);
+    public FontStyle newStyle() {
+        return defaultStyle.copy();
     }
 }

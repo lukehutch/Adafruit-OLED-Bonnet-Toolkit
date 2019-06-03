@@ -73,9 +73,9 @@ public class RootScreen extends Screen {
     	// Set up UI when screen opens
         VLayout layout = new VLayout();
 
-        layout.add(new TextElement(Font.FONT_5X8, "Hello World"), VAlign.TOP);
+        layout.add(new TextElement(Font.PiOLED_5x8().getDefaultStyle(), "Hello World"), VAlign.TOP);
 
-        menu = new Menu(Font.FONT_5X8, /* spacing = */ 0, /* hLayout = */ true,
+        menu = new Menu(Font.PiOLED_5x8().getDefaultStyle(), /* spacing = */ 0, /* hLayout = */ true,
                 "Hello", "Goodbye");
         layout.add(menu, VAlign.BOTTOM);
 

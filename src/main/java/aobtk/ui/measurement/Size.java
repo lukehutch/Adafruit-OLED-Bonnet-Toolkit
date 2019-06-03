@@ -57,4 +57,24 @@ public class Size {
     public String toString() {
         return "(" + w + " x " + h + ")";
     }
+    
+    public static Size min(Size size0, Size size1) {
+        if (size0.w < size1.w && size0.h < size1.h) {
+            return size0;
+        } else if (size1.w < size0.w && size1.h < size0.h) {
+            return size1;
+        } else {
+            return new Size(Math.min(size0.w, size1.w), Math.min(size0.h, size1.h));
+        }
+    }
+    
+    public static Size max(Size size0, Size size1) {
+        if (size0.w > size1.w && size0.h > size1.h) {
+            return size0;
+        } else if (size1.w > size0.w && size1.h > size0.h) {
+            return size1;
+        } else {
+            return new Size(Math.max(size0.w, size1.w), Math.max(size0.h, size1.h));
+        }
+    }
 }

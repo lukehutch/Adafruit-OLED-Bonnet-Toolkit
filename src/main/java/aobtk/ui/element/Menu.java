@@ -35,23 +35,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import aobtk.font.Font;
+import aobtk.font.FontStyle;
 import aobtk.i18n.Str;
 import aobtk.oled.Display;
-import aobtk.oled.Display.Highlight;
 import aobtk.ui.measurement.Size;
 
 public class Menu extends UIElement {
-    private Font font;
+    private FontStyle fontStyle;
     private int spacing;
     private List<Str> items = new ArrayList<>();
     private HVLayout layout;
     private List<TextElement> textElements = new ArrayList<>();
     private volatile int selectedIdx = -1;
-    private Highlight highlightType = Highlight.BLOCK;
+    private FontStyle.Highlight highlightType = FontStyle.Highlight.BLOCK;
 
-    public Menu(Font font, int spacing, boolean hLayout, Str... items) {
-        this.font = font;
+    public Menu(FontStyle fontStyle, int spacing, boolean hLayout, Str... items) {
+        this.fontStyle = fontStyle;
         this.spacing = spacing;
         this.items = new ArrayList<>();
         this.layout = hLayout ? new HLayout() : new VLayout();
@@ -60,8 +59,8 @@ public class Menu extends UIElement {
         }
     }
 
-    public Menu(Font font, int spacing, boolean hLayout, String... items) {
-        this.font = font;
+    public Menu(FontStyle fontStyle, int spacing, boolean hLayout, String... items) {
+        this.fontStyle = fontStyle;
         this.spacing = spacing;
         this.items = new ArrayList<>();
         this.layout = hLayout ? new HLayout() : new VLayout();
@@ -77,7 +76,7 @@ public class Menu extends UIElement {
             if (n > 1 && spacing > 0) {
                 layout.addSpace(spacing);
             }
-            TextElement textElement = new TextElement(font, item);
+            TextElement textElement = new TextElement(fontStyle.copy(), item);
             textElements.add(textElement);
             layout.add(textElement);
             if (n == 1) {
@@ -108,11 +107,11 @@ public class Menu extends UIElement {
     public void setSelectedIdx(int newSelectedIdx) {
         // Unhighlight old selection
         if (selectedIdx >= 0 && selectedIdx < textElements.size()) {
-            textElements.get(selectedIdx).setHighlight(Highlight.NONE);
+            textElements.get(selectedIdx).getFontStyle().setHighlight(FontStyle.Highlight.NONE);
         }
         // Highlight new selection
         if (newSelectedIdx >= 0 && newSelectedIdx < textElements.size()) {
-            textElements.get(newSelectedIdx).setHighlight(highlightType);
+            textElements.get(newSelectedIdx).getFontStyle().setHighlight(highlightType);
         }
         selectedIdx = newSelectedIdx;
     }
@@ -153,7 +152,7 @@ public class Menu extends UIElement {
         layout.clear();
     }
 
-    public void setHighlightType(Highlight highlightType) {
+    public void setHighlightType(FontStyle.Highlight highlightType) {
         this.highlightType = highlightType;
     }
 

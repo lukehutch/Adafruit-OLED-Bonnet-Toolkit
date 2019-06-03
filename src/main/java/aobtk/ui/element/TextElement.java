@@ -31,54 +31,23 @@
  */
 package aobtk.ui.element;
 
-import aobtk.font.Font;
+import aobtk.font.FontStyle;
 import aobtk.i18n.Str;
 import aobtk.oled.Display;
-import aobtk.oled.Display.Highlight;
 import aobtk.ui.measurement.Size;
 
 public class TextElement extends UIElement {
     private volatile Str str;
-    private volatile Font font;
-    private volatile boolean drawWhite = true;
-    volatile Highlight highlight;
+    private volatile FontStyle fontStyle;
 
-    public TextElement(Font font, Str str) {
+    public TextElement(FontStyle fontStyle, Str str) {
         this.str = str;
-        this.font = font;
+        this.fontStyle = fontStyle;
     }
 
-    public TextElement(Font font, String string) {
+    public TextElement(FontStyle fontStyle, String string) {
         this.str = new Str(string);
-        this.font = font;
-    }
-
-    public TextElement(Font font, Highlight highlight, Str str) {
-        this.str = str;
-        this.font = font;
-        this.drawWhite = true;
-        this.highlight = highlight;
-    }
-
-    public TextElement(Font font, Highlight highlight, String string) {
-        this.str = new Str(string);
-        this.font = font;
-        this.drawWhite = true;
-        this.highlight = highlight;
-    }
-
-    public TextElement(Font font, boolean drawWhite, Highlight highlight, Str str) {
-        this.str = str;
-        this.font = font;
-        this.drawWhite = drawWhite;
-        this.highlight = highlight;
-    }
-
-    public TextElement(Font font, boolean drawWhite, Highlight highlight, String string) {
-        this.str = new Str(string);
-        this.font = font;
-        this.drawWhite = drawWhite;
-        this.highlight = highlight;
+        this.fontStyle = fontStyle;
     }
 
     public void setStr(Str str) {
@@ -89,27 +58,23 @@ public class TextElement extends UIElement {
         this.str = new Str(string);
     }
 
-    public void setFont(Font font) {
-        this.font = font;
+    public void setFontStyle(FontStyle fontStyle) {
+        this.fontStyle = fontStyle;
     }
 
-    public void setDrawWhite(boolean drawWhite) {
-        this.drawWhite = drawWhite;
+    public FontStyle getFontStyle() {
+        return fontStyle;
     }
-
-    public void setHighlight(Highlight highlight) {
-        this.highlight = highlight;
-    }
-
+    
     @Override
     protected Size measure(int maxW, int maxH) {
-        return size = hide ? Size.ZERO : new Size(font.getOuterWidth(str.toString()), font.getOuterHeight());
+        return size = hide ? Size.ZERO : fontStyle.measure(str.toString());
     }
 
     @Override
     protected void render(int x, int y, int maxW, int maxH, Display display) {
         if (!hide) {
-            font.drawString(str.toString(), x, y, maxW, maxH, drawWhite, highlight, display);
+            fontStyle.drawString(str.toString(), x, y, maxW, maxH, display);
         }
     }
 

@@ -34,6 +34,8 @@ package aobtk.oled;
 import java.io.IOException;
 import java.util.Arrays;
 
+import aobtk.font.FontStyle;
+
 /**
  * A display class for the OLED driver.
  *
@@ -53,10 +55,6 @@ public class Display {
 
     private volatile boolean shutdown;
 
-    public static enum Highlight {
-        NONE, HALO, BLOCK;
-    }
-
     public Display(OLEDDriver driver) {
         this.driver = driver;
     }
@@ -74,10 +72,10 @@ public class Display {
         return OLEDDriver.DISPLAY_HEIGHT;
     }
 
-    public synchronized void setPixel(int x, int y, boolean drawWhite, Highlight highlight) {
+    public synchronized void setPixel(int x, int y, boolean drawWhite, FontStyle.Highlight highlight) {
         if (x >= 0 && x < OLEDDriver.DISPLAY_WIDTH && y >= 0 && y < OLEDDriver.DISPLAY_HEIGHT) {
             pixBuffer[x + y * OLEDDriver.DISPLAY_WIDTH] = drawWhite ? (byte) 1 : (byte) 0;
-            if (highlight == Highlight.HALO) {
+            if (highlight == FontStyle.Highlight.HALO) {
                 // Surround pixel with inverted region, if pixel is highlighted
                 for (int yo = y - 1, yoMax = y + 1; yo <= yoMax; yo++) {
                     for (int xo = x - 1, xoMax = x + 1; xo <= xoMax; xo++) {
@@ -102,7 +100,7 @@ public class Display {
     }
 
     public synchronized void setPixel(int x, int y, boolean drawWhite) {
-        setPixel(x, y, drawWhite, Highlight.NONE);
+        setPixel(x, y, drawWhite, FontStyle.Highlight.NONE);
     }
 
     /** Set or clear all pixels in a rectangle. */

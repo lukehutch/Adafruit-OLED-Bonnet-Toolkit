@@ -36,7 +36,6 @@ import java.util.Arrays;
 public class Str {
 
     public static volatile int lang = 0;
-    public static volatile int numLangs = 2;
 
     private String[] strings;
 
@@ -47,14 +46,8 @@ public class Str {
         this.strings = strings;
     }
 
-    public static void setNumLanguages(int numLangs) {
-        Str.numLangs = numLangs;
-    }
-
-    public static void switchLanguages() {
-        if (++lang >= numLangs) {
-            lang = 0;
-        }
+    public static void setLanguage(int language) {
+        Str.lang = lang;
     }
 
     @Override

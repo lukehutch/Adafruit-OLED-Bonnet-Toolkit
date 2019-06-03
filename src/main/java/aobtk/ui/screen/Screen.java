@@ -133,11 +133,15 @@ public abstract class Screen {
         this.parentScreen = parentScreen;
     }
 
-    /** Called when {@link Screen} is first opened. Implement to initialize subclasses. */
+    /**
+     * Called when {@link Screen} is first opened. Implement to initialize subclasses, and to call
+     * {@link #setUI(UIElement)} with the initial toplevel {@link UIElement}.
+     */
     public abstract void open();
 
-    /** Called when {@link Screen} is first opened. Implement to tear down subclasses. */
-    public abstract void close();
+    /** Called when {@link Screen} is closed. Override if necessary. */
+    public void close() {
+    }
 
     /** Set current screen. */
     public static void setCurrScreen(Screen newCurrScreen) {
