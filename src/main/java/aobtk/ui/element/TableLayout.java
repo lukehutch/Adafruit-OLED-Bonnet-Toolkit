@@ -39,6 +39,8 @@ import aobtk.oled.Display;
 import aobtk.ui.measurement.Size;
 
 public class TableLayout extends UIElement {
+    private int rowSpacing;
+    private int colSpacing;
     private List<List<UIElement>> tableElements = new ArrayList<>();
 
     private Size tableDim;
@@ -57,17 +59,33 @@ public class TableLayout extends UIElement {
         LEFT, CENTER, RIGHT
     }
 
-    public TableLayout() {
+    public TableLayout(int rowSpacing, int colSpacing) {
+        this.rowSpacing = rowSpacing;
+        this.colSpacing = colSpacing;
     }
 
-    public TableLayout(List<List<UIElement>> tableElements) {
+    public TableLayout(int rowSpacing, int colSpacing, List<List<UIElement>> tableElements) {
+        this(rowSpacing, colSpacing);
         this.tableElements = tableElements;
     }
 
-    public TableLayout(UIElement[]... tableElements) {
+    public TableLayout(int rowSpacing, int colSpacing, UIElement[]... tableElements) {
+        this(rowSpacing, colSpacing);
         for (UIElement[] rowElements : tableElements) {
             this.tableElements.add(Arrays.asList(rowElements));
         }
+    }
+
+    public TableLayout() {
+        this(0, 0);
+    }
+
+    public TableLayout(List<List<UIElement>> tableElements) {
+        this(0, 0, tableElements);
+    }
+
+    public TableLayout(UIElement[]... tableElements) {
+        this(0, 0, tableElements);
     }
 
     public void clear() {
@@ -156,11 +174,17 @@ public class TableLayout extends UIElement {
         }
 
         tableDim = getTableDim();
-        if (rowHeights == null || rowHeights.size() != tableDim.h) {
+        if (rowHeights == null || rowHeights.size() < tableDim.h) {
             rowHeights = new ArrayList<>(tableDim.h);
+            for (int row = 0; row < tableDim.h; row++) {
+                rowHeights.add(Integer.valueOf(0));
+            }
         }
-        if (colWidths == null || colWidths.size() != tableDim.w) {
+        if (colWidths == null || colWidths.size() < tableDim.w) {
             colWidths = new ArrayList<>(tableDim.w);
+            for (int col = 0; col < tableDim.w; col++) {
+                colWidths.add(Integer.valueOf(0));
+            }
         }
 
         // Measure max column widths and row heights
@@ -176,6 +200,9 @@ public class TableLayout extends UIElement {
             }
             colWidths.set(col, maxWidthForCol);
             remainingMaxW = Math.max(0, remainingMaxW - maxWidthForCol);
+            if (col < tableDim.w - 1) {
+                remainingMaxW = Math.max(0, remainingMaxW - colSpacing);
+            }
         }
         int remainingMaxH = maxH;
         for (int row = 0; row < tableDim.h; row++) {
@@ -189,6 +216,9 @@ public class TableLayout extends UIElement {
             }
             rowHeights.set(row, maxHeightForRow);
             remainingMaxH = Math.max(0, remainingMaxH - maxHeightForRow);
+            if (row < tableDim.h - 1) {
+                remainingMaxH = Math.max(0, remainingMaxH - rowSpacing);
+            }
         }
 
         // Go back and re-measure elements, constraining them to max row height and max col width
@@ -246,9 +276,15 @@ public class TableLayout extends UIElement {
                         }
                         elt.render(xDisp, yDisp, cropW, cropH, display);
                         xCurr += colWidth;
+                        if (col < tableDim.w - 1 && xCurr - x < maxW) {
+                            xCurr += colSpacing;
+                        }
                     }
                 }
                 yCurr += rowHeight;
+                if (row < tableDim.h - 1 && yCurr - y < maxH) {
+                    yCurr += rowSpacing;
+                }
             }
         }
     }
