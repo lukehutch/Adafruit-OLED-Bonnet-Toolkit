@@ -28,7 +28,7 @@ dtparam=i2c_baudrate=1000000
 
 ## Simple example
 
-[See a simple demo application here.](https://github.com/lukehutch/Adafruit-OLED-Bonnet-Toolkit/tree/master/src/main/java/aobtk/demo)
+[See a simple demo application here.](https://github.com/lukehutch/Adafruit-OLED-Bonnet-Toolkit/tree/master/src/main/java/demo)
 
 ## More complex example
 
