@@ -31,7 +31,7 @@
  */
 package aobtk.ui.element;
 
-public abstract class Layout extends UIElement {
+public abstract class HVLayout extends UIElement {
 
     public abstract void add(UIElement uiElement);
 

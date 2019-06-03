@@ -38,7 +38,7 @@ import aobtk.oled.Display;
 import aobtk.ui.element.HLayout.HAlign;
 import aobtk.ui.measurement.Size;
 
-public class VLayout extends Layout {
+public class VLayout extends HVLayout {
     private List<UIElement> topElements = new ArrayList<>();
     private int topTotHeight;
     private List<UIElement> centerElements = new ArrayList<>();

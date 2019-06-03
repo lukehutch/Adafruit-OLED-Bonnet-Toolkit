@@ -45,7 +45,7 @@ public class Menu extends UIElement {
     private Font font;
     private int spacing;
     private List<Str> items = new ArrayList<>();
-    private Layout layout;
+    private HVLayout layout;
     private List<TextElement> textElements = new ArrayList<>();
     private volatile int selectedIdx = -1;
     private Highlight highlightType = Highlight.BLOCK;
