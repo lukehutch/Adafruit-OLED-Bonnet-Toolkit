@@ -6,7 +6,6 @@
 package demo;
 
 import aobtk.hw.Bonnet;
-import aobtk.i18n.Str;
 import aobtk.ui.screen.Screen;
 
 public class Main {
@@ -14,9 +13,6 @@ public class Main {
         // Initialize the Button class, and register the GPIO event listeners
         Bonnet.init();
 
-        // Set language (0 => English, 1 => Chinese, 2 => Korean)
-        Str.lang = 0;
-        
         // Initialize UI with the RootScreen class
         Screen.init(new RootScreen());
 

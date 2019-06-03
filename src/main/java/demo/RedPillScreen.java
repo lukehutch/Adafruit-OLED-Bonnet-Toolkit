@@ -21,7 +21,7 @@ public class RedPillScreen extends Screen {
 
     @Override
     public void open() {
-        setUI(new VLayout(new TextElement(Font.WenQuanYi_15_bold().newStyle(), RED_PILL)));
+        setUI(new VLayout(new TextElement(Font.WenQuanYi_16_bold().newStyle(), RED_PILL)));
     }
 
     @Override

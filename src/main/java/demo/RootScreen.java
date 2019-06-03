@@ -52,6 +52,7 @@ public class RootScreen extends Screen {
 
     @Override
     public void buttonDown(HWButton button) {
+        System.out.println("Got button " + button);
         switch (button) {
         case L:
             menu.decSelectedIdx();
@@ -60,8 +61,8 @@ public class RootScreen extends Screen {
             menu.incSelectedIdx();
             break;
         case C:
-            // Switch languages
-            Str.setLanguage((Str.lang + 1) % 3);
+            // Switch languages (0 => English, 1 => Chinese, 2 => Korean)
+            Str.lang = (Str.lang + 1) % 3;
             // Schedule a repaint since UI changed
             repaint();
             break;

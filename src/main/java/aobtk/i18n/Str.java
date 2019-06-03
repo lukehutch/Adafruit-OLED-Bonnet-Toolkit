@@ -46,10 +46,6 @@ public class Str {
         this.strings = strings;
     }
 
-    public static void setLanguage(int language) {
-        Str.lang = lang;
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {
