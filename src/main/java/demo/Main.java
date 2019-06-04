@@ -21,6 +21,7 @@ public class Main {
             try {
                 Thread.sleep(1000_000);
             } catch (InterruptedException e) {
+                Bonnet.shutdown();
                 break;
             }
         }
