@@ -400,6 +400,19 @@ public class Font {
         }
         return fontChar;
     }
+    
+    public boolean containsChar(char c) {
+        return charToFontChar.containsKey(c);
+    }
+    
+    public boolean containsChars(String str) {
+        for (int i = 0; i < str.length(); i++) {
+            if (!containsChar(str.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     public FontStyle newStyle() {
         return defaultStyle.copy();
