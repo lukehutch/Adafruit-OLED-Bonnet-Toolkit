@@ -35,15 +35,36 @@ import java.util.Arrays;
 
 public class Str {
 
+    private static final String TEMPLATE_CHAR = "$";
+
+    /**
+     * The current language. If you change this, all strings will be displayed in the new language at the next UI
+     * repaint.
+     */
     public static volatile int lang = 0;
 
     private String[] strings;
+    private Object[] params;
 
+    /** Create a {@link Str} object, with one string per language. */
     public Str(String... strings) {
         if (strings.length == 0) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Need at least one string parameter");
         }
         this.strings = strings;
+    }
+
+    /**
+     * Fill in parameters of a template {@link Str} object. Each substring "$0", "$1" etc. in the template has a
+     * corresponding parameter substituted when {@link Str#toString()} is called.
+     */
+    public Str(Str template, Object... params) {
+        this.strings = template.strings;
+        if (params.length > 10) {
+            // For more than 10 params, will need to implement a syntax like "${10}"
+            throw new IllegalArgumentException("Only up to 10 params are supported currently");
+        }
+        this.params = params;
     }
 
     @Override
@@ -62,11 +83,43 @@ public class Str {
     }
 
     public String toString(int langIdx) {
-        return langIdx >= strings.length ? strings[0] : strings[langIdx];
+        int langIdxToUse = langIdx < 0 || langIdx >= strings.length ? 0 : langIdx;
+        return strings[langIdxToUse];
     }
 
     @Override
     public String toString() {
-        return lang >= strings.length ? strings[0] : strings[lang];
+        String template = toString(lang);
+        if (params == null || params.length == 0) {
+            // No params to substitute
+            return template;
+        } else {
+            // Substitute params
+            StringBuilder buf = new StringBuilder();
+            int currPos = 0;
+            for (int nextParamPos; (nextParamPos = template.indexOf(TEMPLATE_CHAR, currPos)) >= 0;) {
+                if (nextParamPos > currPos) {
+                    // Copy chars before param
+                    buf.append(template.subSequence(currPos, nextParamPos));
+                }
+                char nextChar = nextParamPos == template.length() - 1 ? '\0' : template.charAt(nextParamPos + 1);
+                if (nextChar >= '0' && nextChar <= '9') {
+                    // Found a template parameter
+                    int paramIdx = nextChar - '0';
+                    if (paramIdx < params.length) {
+                        buf.append(params[paramIdx++]);
+                    }
+                    currPos = nextParamPos + 2;
+                } else {
+                    // Not a template parameter
+                    buf.append(TEMPLATE_CHAR);
+                    currPos = nextParamPos + 1;
+                }
+            }
+            if (currPos < template.length()) {
+                buf.append(template.subSequence(currPos, template.length()));
+            }
+            return buf.toString();
+        }
     }
 }
