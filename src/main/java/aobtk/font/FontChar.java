@@ -46,7 +46,7 @@ public class FontChar {
     /** Height of pixels defined in character. */
     public final int glyphH;
 
-    /** The nominal display width of the character. */ 
+    /** The nominal display width of the character. */
     public int nominalW;
 
     /** The width to the rightmost drawn pixel. */
@@ -73,20 +73,50 @@ public class FontChar {
     /** Initialize a character from a larger int[] pixel grid, with one pixel per int. */
     public FontChar(int glyphPosX, int glyphPosY, int glyphW, int glyphH, int nominalW, int[] pixels, int stride) {
         super();
-        // x,y are Cartesian coords from bottom left of char pixel grid
-        this.glyphPosX = glyphPosX;
-        this.glyphPosY = glyphPosY;
-        this.glyphW = glyphW;
-        this.glyphH = glyphH;
+
+        // Find outermost pixels of glyph. This allows the glyph to be compressed by storing only the contents
+        // of the innermost bounding box of the glyph. It also allows the font to be displayed as proportional
+        // (removing spacing on the left and right of the char), even if it wasn't defined as such.
+        boolean firstPixelFound = false;
+        int minX = 0;
+        int maxX = 0;
+        int minY = 0;
+        int maxY = 0;
+        for (int y = 0; y < glyphH; y++) {
+            for (int x = 0; x < glyphW; x++) {
+                boolean pixelSet = pixels[x + y * stride] != 0;
+                if (pixelSet) {
+                    if (!firstPixelFound || x < minX) {
+                        minX = x;
+                    }
+                    if (!firstPixelFound || x > maxX) {
+                        maxX = x;
+                    }
+                    if (!firstPixelFound || y < minY) {
+                        minY = y;
+                    }
+                    if (!firstPixelFound || y > maxY) {
+                        maxY = y;
+                    }
+                    firstPixelFound = true;
+                }
+            }
+        }
+
+        // Add first pixel row/column position to glyph position
+        this.glyphPosX = glyphPosX + minX;
+        this.glyphPosY = glyphPosY + minY;
+        this.glyphW = maxX - minX + (firstPixelFound ? 1 : 0);
+        this.glyphH = maxY - minY + (firstPixelFound ? 1 : 0);
         this.nominalW = nominalW;
         this.charPixBits = new byte[getCharPixBitsLen()];
 
         // Pack pixels into bit array
-        for (int r = 0; r < glyphH; r++) {
-            for (int c = 0; c < glyphW; c++) {
-                boolean pixelSet = pixels[c + r * stride] != 0;
+        for (int y = minY, yy = y + this.glyphH; y < yy; y++) {
+            for (int x = minX, xx = x + this.glyphW; x < xx; x++) {
+                boolean pixelSet = pixels[x + y * stride] != 0;
                 if (pixelSet) {
-                    int absBitIdx = c + r * glyphW;
+                    int absBitIdx = (x - minX) + (y - minY) * this.glyphW;
                     int byteIdx = absBitIdx >> 3;
                     int relBitIdx = 7 - (absBitIdx & 7);
                     charPixBits[byteIdx] |= (1 << relBitIdx);
@@ -163,14 +193,25 @@ public class FontChar {
     }
 
     public void printGrid() {
+        System.out.print('┌');
+        for (int i = 0; i < glyphW; i++) {
+            System.out.print("──");
+        }
+        System.out.println('┐');
         for (int r = 0; r < glyphH; r++) {
+            System.out.print('│');
             for (int c = 0; c < glyphW; c++) {
                 int bitIdx = c + r * glyphW;
                 byte b = charPixBits[(bitIdx >> 3) + charPixBitsStartIdx];
                 boolean bit = (b & (1 << (7 - (bitIdx & 7)))) != 0;
-                System.out.print(bit ? '#' : ' ');
+                System.out.print(bit ? "██" : "  ");
             }
-            System.out.println();
+            System.out.println('│');
         }
+        System.out.print('└');
+        for (int i = 0; i < glyphW; i++) {
+            System.out.print("──");
+        }
+        System.out.println('┘');
     }
 }

@@ -60,7 +60,8 @@ class ImportPiOLEDFonts {
         for (int i = 0; i < lines.size(); i++) {
             String line = lines.get(i);
             
-            // Characters are in cp437
+            // Characters are in cp437 (or something similar -- some of the high-bit-set glyphs
+            // map to the wrong character)
             array[0] = (byte) (charStart + i);
             char chr = decoder.decode(ByteBuffer.wrap(array)).charAt(0);
 

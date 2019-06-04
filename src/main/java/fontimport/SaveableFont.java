@@ -64,12 +64,12 @@ class SaveableFont extends Font {
             TreeMap<Character, FontChar> sortedMap = new TreeMap<>(charToFontChar);
             List<Entry<Character, FontChar>> entries = new ArrayList<>(sortedMap.entrySet());
             int numChars = entries.size();
-            
+
             // Visualize entries
             for (int i = 0; i < entries.size(); i++) {
                 Entry<Character, FontChar> ent = entries.get(i);
                 FontChar charInfo = ent.getValue();
-                System.out.println("\nChar " + ent.getKey() + ":");
+                System.out.println("\nChar " + ent.getKey() + " (" + Integer.toString(ent.getKey(), 16) + "):");
                 charInfo.printGrid();
             }
 
