@@ -61,11 +61,6 @@ public class RootScreen extends Screen {
             menu.incSelectedIdx();
             break;
         case C:
-            // Switch languages (0 => English, 1 => Chinese, 2 => Korean)
-            Str.lang = (Str.lang + 1) % 3;
-            // Schedule a repaint since UI changed
-            repaint();
-            break;
         case B:
             // Center button or button B will move to child screen
             if (menu.getSelectedItem() == BLUE_PILL) {

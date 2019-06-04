@@ -13,8 +13,8 @@ public class Main {
         // Initialize the Button class, and register the GPIO event listeners
         Bonnet.init();
 
-        // Initialize UI with the RootScreen class
-        Screen.init(new RootScreen());
+        // Start with ChooseLangScreen
+        Screen.init(new ChooseLangScreen());
 
         // Keep program running until termination
         for (;;) {
