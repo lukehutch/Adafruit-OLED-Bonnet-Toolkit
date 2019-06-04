@@ -59,11 +59,11 @@ class SaveableFont extends Font {
 
             List<FontChar> fontChars = getFontChars();
 
-            // Visualize characters in font
-            for (FontChar fontChar : fontChars) {
-                System.out.println("\nChar " + fontChar.chr + " (" + Integer.toString(fontChar.chr, 16) + "):");
-                fontChar.printGrid();
-            }
+            //            // Visualize characters in font
+            //            for (FontChar fontChar : fontChars) {
+            //                System.out.println("\nChar " + fontChar.chr + " (" + Integer.toString(fontChar.chr, 16) + "):");
+            //                fontChar.printGrid();
+            //            }
 
             // Concatenate the pixel bytes from all characters
             int numChars = fontChars.size();

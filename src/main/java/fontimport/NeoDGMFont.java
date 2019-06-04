@@ -31,7 +31,7 @@ import aobtk.font.FontChar;
  * "Original font was released under the public domain by Jungtae Kim in 1990s. Conversion & additional character
  * design by Dalgona. <dalgona@hontou.moe>". The code doesn't have a separate license listed.
  */
-class ImportNeoDGMFont {
+class NeoDGMFont {
 
     private static final int[][] cho_tbl = { //
             { 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 1, 2, 4, 4, 4, 2, 1, 3, 0 }, //
@@ -63,7 +63,7 @@ class ImportNeoDGMFont {
         }
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void importNeoDGMFont() throws IOException {
         File srcDir = new File("font-src/neodgm-font");
         if (!srcDir.exists()) {
             throw new FileNotFoundException(srcDir.toString());
@@ -161,7 +161,5 @@ class ImportNeoDGMFont {
         String savePath = "src/main/resources/fonts/neodgm-16-font";
         System.out.println("Saving font to " + savePath);
         new SaveableFont(charToCharInfo).save(savePath);
-
-        System.out.println("Finished");
     }
 }

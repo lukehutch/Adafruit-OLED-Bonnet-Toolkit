@@ -145,6 +145,7 @@ class BDFFontConverter {
         }
     }
 
+    // Spec: https://www.adobe.com/content/dam/acom/en/devnet/font/pdfs/5005.BDF_Spec.pdf
     public static void importBDFFont(File inputFile, String outputName, int maxGlyphW, int maxGlyphH)
             throws IOException {
         Map<String, Character> fontGlyphNameMap = loadFontGlyphNameMap();
@@ -168,17 +169,27 @@ class BDFFontConverter {
         int[] charPix = new int[charPixStride * maxGlyphH * 2];
 
         // Read chars
+        int fontBBH = 0;
         int fontBBDX = 0;
         int fontBBDY = 0;
+        int fontAscent = 0;
+        int fontDescent = 0;
         List<String> lines = Files.readAllLines(inputFile.toPath());
         for (int i = 0; i < lines.size(); i++) {
             String line = lines.get(i);
             if (line.startsWith("FONTBOUNDINGBOX")) {
                 String[] parts = line.substring(16).split(" ");
+                fontBBH = Integer.parseInt(parts[1]);
                 fontBBDX = Integer.parseInt(parts[2]);
                 fontBBDY = Integer.parseInt(parts[3]);
-            }
-            if (line.startsWith("STARTCHAR")) {
+
+            } else if (line.startsWith("FONT_DESCENT")) {
+                fontDescent = Integer.parseInt(line.substring(13));
+
+            } else if (line.startsWith("FONT_ASCENT")) {
+                fontAscent = Integer.parseInt(line.substring(12));
+
+            } else if (line.startsWith("STARTCHAR")) {
                 String charName = line.substring(10);
                 Character c = fontGlyphNameMap.get(charName);
                 if (c == null && charName.startsWith("U+") || charName.startsWith("U_")
@@ -195,16 +206,23 @@ class BDFFontConverter {
                     int charH = 0;
                     int charDX = 0;
                     int charDY = 0;
+                    int dWidth = 0;
                     while (++i < lines.size() && !(line = lines.get(i)).startsWith("BITMAP")
                             && !line.startsWith("ENDCHAR")) {
+
                         if (line.startsWith("BBX")) {
                             String[] parts = line.substring(4).split(" ");
                             charW = Integer.parseInt(parts[0]);
                             charH = Integer.parseInt(parts[1]);
                             charDX = Integer.parseInt(parts[2]);
                             charDY = Integer.parseInt(parts[3]);
+
+                        } else if (line.startsWith("DWIDTH")) {
+                            String[] parts = line.substring(7).split(" ");
+                            dWidth = Integer.parseInt(parts[0]);
                         }
                     }
+
                     if (line.startsWith("BITMAP")) {
                         Arrays.fill(charPix, 0);
                         for (int row = 0; ++i < lines.size()
@@ -227,7 +245,7 @@ class BDFFontConverter {
                         //        System.out.println();
                         //    }
 
-                        // A few characters are wider than their max font dimension allows (by one pixel).
+                        // A few characters are wider or taller than their max font dimension allows (by one pixel).
                         // Just OR together their last column or row. (They are mostly drawing characters.)
                         if (charW > maxGlyphW) {
                             System.out.println("Squashing right side of overly wide char " + c);
@@ -248,16 +266,16 @@ class BDFFontConverter {
                             }
                         }
 
-                        // Spot check char size
-                        if (charW > maxGlyphW || charH > maxGlyphH) {
-                            throw new RuntimeException("Character too big: " + c);
-                        }
+                        // Get nominal width of character (which is the x-component of DWIDTH).
+                        // N.B. if this is zero or negative, because the char is used for composition,
+                        // replace it with maxGlyphW.
+                        int nominalW = dWidth > 0 ? dWidth : maxGlyphW;
 
                         // Create char
                         FontChar charData = new FontChar(c, charDX - fontBBDX,
                                 // Invert dy, since dy is Cartesian, but pixels are in screen row order
                                 maxGlyphH - (charH + (charDY - fontBBDY)), //
-                                charW, charH, charW, charPix, charPixStride);
+                                charW, charH, nominalW, charPix, charPixStride);
                         charToCharInfo.put(c, charData);
 
                         // Separately find optimal alignment of different character types to the (fontDim x fontDim) grid

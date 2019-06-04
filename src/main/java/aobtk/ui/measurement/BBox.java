@@ -29,15 +29,33 @@
  * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
  * OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package fontimport;
+package aobtk.ui.measurement;
 
-import java.io.File;
-import java.io.IOException;
+public class BBox {
+    public int x0;
+    public int y0;
+    public int x1;
+    public int y1;
 
-class ImportGNUUniFont {
-    public static void main(String[] args) throws IOException {
-        BDFFontConverter.importBDFFont(new File("font-src/gnu-unifont/unifont-12.1.02.bdf"),
-                /* outputFileName = */ "gnu-unifont-16-font", /* maxGlyphW = */ 16, /* maxGlyphH = */ 16);
-        System.out.println("Finished");
+    public BBox(int x0, int y0, int x1, int y1) {
+        this.x0 = x0;
+        this.y0 = y0;
+        this.x1 = x1;
+        this.y1 = y1;
+    }
+
+    @Override
+    public String toString() {
+        return "(" + x0 + "," + y0 + ")-(" + x1 + "," + y1 + ")";
+    }
+
+    public BBox union(BBox o) {
+        if (x0 <= o.x0 && x1 >= o.x1 && y0 <= o.y0 && y1 >= o.y1) {
+            return this;
+        } else if (o.x0 <= x0 && o.x1 >= x1 && o.y0 <= y0 && o.y1 >= y1) {
+            return o;
+        } else {
+            return new BBox(Math.min(x0, o.x0), Math.min(y0, o.y0), Math.max(x1, o.x1), Math.max(y1, o.y1));
+        }
     }
 }

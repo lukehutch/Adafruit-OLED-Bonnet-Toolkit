@@ -81,7 +81,7 @@ public class FontStyle {
      * Draw a character, cropping it to a maximum width and height, and return the (possibly cropped) width of the
      * character.
      */
-    public int drawChar(char c, int x, int y, int maxW, int maxH, Display display) {
+    private int drawChar(char c, int x, int y, int maxW, int maxH, Display display) {
         int charWidth = 0;
         if (maxW > 0 && maxH > 0) {
             if (c == ' ') {
@@ -97,17 +97,12 @@ public class FontStyle {
                 charWidth = charSpacing == CharSpacing.PROPORTIONAL ? drawnWidth
                         : charSpacing == CharSpacing.NOMINAL ? fontChar.nominalW : font.getMaxCharWidth();
             }
-            if (display != null) {
-                if (highlight == FontStyle.Highlight.BLOCK) {
-                    display.invertBlock(x - 1, y - 1, charWidth + 2, Math.min(maxH, font.getMaxCharHeight()) + 2);
-                }
-            }
         }
         return charWidth;
     }
 
     /** Draw a character, and return the outer width of the character. */
-    public int drawChar(char c, int x, int y, Display display) {
+    private int drawChar(char c, int x, int y, Display display) {
         int charWidth;
         if (c == ' ') {
             charWidth = spaceWidth();
@@ -122,17 +117,12 @@ public class FontStyle {
             charWidth = charSpacing == CharSpacing.PROPORTIONAL ? drawnWidth
                     : charSpacing == CharSpacing.NOMINAL ? fontChar.nominalW : font.getMaxCharWidth();
         }
-        if (display != null) {
-            if (highlight == FontStyle.Highlight.BLOCK) {
-                display.invertBlock(x - 1, y - 1, charWidth + 2, font.getMaxCharHeight() + 2);
-            }
-        }
         return charWidth;
     }
 
     /**
-     * Draw a string (splitting into lines at the newline character), and return the width and height of the drawn
-     * area, in pixels.
+     * Draw a string (splitting into lines at the newline character), clipped to a given maximum width and height,
+     * and return the width and height of the drawn area in pixels.
      */
     public Size drawString(String string, int x, int y, int maxW, int maxH, Display display) {
         int posX = x;
@@ -160,12 +150,20 @@ public class FontStyle {
                 }
             }
         }
-        return new Size(Math.min(renderedW, maxW), Math.min(renderedH, maxH));
+        
+        Size renderedSize = new Size(Math.min(renderedW, maxW), Math.min(renderedH, maxH));
+        System.out.println(string + " " + x + " " + y + " " + maxW + " " + maxH + " " + renderedSize);
+        if (display != null) {
+            if (highlight == FontStyle.Highlight.BLOCK) {
+                display.invertBlock(x - 1, y - 1, renderedSize.w + 2, renderedSize.h + 2);
+            }
+        }
+        return renderedSize;
     }
 
     /**
      * Draw a string (splitting into lines at the newline character), and return the width and height of the drawn
-     * area, in pixels.
+     * area in pixels.
      */
     public Size drawString(String string, int x, int y, Display display) {
         int posX = x;
@@ -191,7 +189,13 @@ public class FontStyle {
                 }
             }
         }
-        return new Size(renderedW, renderedH);
+        Size renderedSize = new Size(renderedW, renderedH);
+        if (display != null) {
+            if (highlight == FontStyle.Highlight.BLOCK) {
+                display.invertBlock(x - 1, y - 1, renderedSize.w + 2, renderedSize.h + 2);
+            }
+        }
+        return renderedSize;
     }
 
     /** Measure the size of a block of text, breaking at newlines. */
