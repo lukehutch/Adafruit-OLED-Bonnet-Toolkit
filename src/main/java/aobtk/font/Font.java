@@ -62,18 +62,24 @@ public class Font {
 
     /**
      * <a href="https://github.com/Dalgona/neodgm">NeoDGM</a> font, with support for
-     * <a href="https://dalgona.github.io/neodgm/">Latin1, Hangeul, box drawing characters and Braille</a>. Latin1
-     * characters have size 16x8 and Hangeul characters have size 16x16.
+     * <a href="https://dalgona.github.io/neodgm/">Latin1, Hangeul, box drawing characters and Braille</a>.
+     * 
+     * This font is in proportional mode by default (so that characters take as little horizontal space as
+     * possible), but also works well with {@link FontStyle#setCharSpacing(CharSpacing)} of
+     * {@link CharSpacing#PROPORTIONAL}, which renders Hangeul characters with size 16x16, and other characters with
+     * size 16x8.
      */
     public static Font NeoDGM_16() {
         return NeoDGM_16.FONT;
     }
 
     private static class NeoDGM_16 {
-        // Korean chars are 16x16, other chars are designed for 16x8, so respect nominal spacing by default 
         private static final Font FONT = new Font("fonts/neodgm-16-font");
-        // With nominal character spacing, there are already appropriate gaps between pixels (no extra padding needed) 
-        // Don't pad Y, since 16 pixels high fits 4 rows on a 48 pixel row display
+        static {
+            FONT.defaultStyle.setCharSpacing(CharSpacing.PROPORTIONAL);
+            FONT.defaultStyle.setPadX(1);
+            // Don't pad Y, since 16 pixels high fits 4 rows on a 48 pixel row display.
+        }
     }
 
     /** Basic 4x5 ASCII font (uppercase only). */
@@ -84,7 +90,9 @@ public class Font {
     private static class PiOLED_4x5 {
         private static final Font FONT = new Font("fonts/pi-oled-4x5-font");
         static {
-            // This font is illegible if not paded in both X and Y by default
+            // Take as little space as possible
+            FONT.defaultStyle.setCharSpacing(CharSpacing.PROPORTIONAL);
+            // This font is illegible if not padded in both X and Y by default.
             FONT.defaultStyle.setPadX(1);
             FONT.defaultStyle.setPadY(1);
         }
@@ -98,7 +106,10 @@ public class Font {
     private static class PiOLED_5x8 {
         private static final Font FONT = new Font("fonts/pi-oled-5x8-font");
         static {
-            // Need to pad X, but this font is designed to be compact, so don't pad Y by default
+            // Take as little space as possible
+            FONT.defaultStyle.setCharSpacing(CharSpacing.PROPORTIONAL);
+            // Need to pad X, but this font is designed to be compact, and its vertical axis nicely divides
+            // 48 pixel rows, so don't pad Y by default.
             FONT.defaultStyle.setPadX(1);
         }
     }
@@ -115,10 +126,10 @@ public class Font {
     private static class WenQuanYi_12 {
         private static final Font FONT = new Font("fonts/wqy-12-font");
         static {
-            // Make this font proportional, otherwise Latin1 chars are spaced way too far apart
+            // Make this font proportional, otherwise Latin1 chars are spaced way too far apart.
             FONT.defaultStyle.setCharSpacing(CharSpacing.PROPORTIONAL);
             FONT.defaultStyle.setPadX(1);
-            FONT.defaultStyle.setPadY(1);
+            // 12 nicely divides 48, so don't pad in Y by default.
         }
     }
 
@@ -137,7 +148,7 @@ public class Font {
             // Make this font proportional, otherwise Latin1 chars are spaced way too far apart
             FONT.defaultStyle.setCharSpacing(CharSpacing.PROPORTIONAL);
             FONT.defaultStyle.setPadX(1);
-            FONT.defaultStyle.setPadY(1);
+            // 12 nicely divides 48, so don't pad in Y by default.
         }
     }
 
@@ -156,7 +167,7 @@ public class Font {
             // Make this font proportional, otherwise Latin1 chars are spaced way too far apart
             FONT.defaultStyle.setCharSpacing(CharSpacing.PROPORTIONAL);
             FONT.defaultStyle.setPadX(1);
-            FONT.defaultStyle.setPadY(1);
+            // Don't pad in Y -- most chars have built-in visual padding
         }
     }
 
@@ -175,7 +186,7 @@ public class Font {
             // Make this font proportional, otherwise Latin1 chars are spaced way too far apart
             FONT.defaultStyle.setCharSpacing(CharSpacing.PROPORTIONAL);
             FONT.defaultStyle.setPadX(1);
-            FONT.defaultStyle.setPadY(1);
+            // Don't pad in Y -- most chars have built-in visual padding
         }
     }
 
@@ -194,7 +205,7 @@ public class Font {
             // Make this font proportional, otherwise Latin1 chars are spaced way too far apart
             FONT.defaultStyle.setCharSpacing(CharSpacing.PROPORTIONAL);
             FONT.defaultStyle.setPadX(1);
-            FONT.defaultStyle.setPadY(1);
+            // Don't pad in Y -- most chars have built-in visual padding
         }
     }
 
@@ -213,7 +224,7 @@ public class Font {
             // Make this font proportional, otherwise Latin1 chars are spaced way too far apart
             FONT.defaultStyle.setCharSpacing(CharSpacing.PROPORTIONAL);
             FONT.defaultStyle.setPadX(1);
-            FONT.defaultStyle.setPadY(1);
+            // Don't pad in Y -- most chars have built-in visual padding
         }
     }
 
