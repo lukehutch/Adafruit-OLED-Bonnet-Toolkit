@@ -98,9 +98,9 @@ public abstract class Screen {
                                     try {
                                         display.update();
                                     } catch (IOException e) {
+                                        // Probably happened because finalizer ran before this thread was killed
                                         System.out.println("Failed to update display");
                                         e.printStackTrace();
-                                        System.exit(1);
                                     }
                                 }
                             }

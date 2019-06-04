@@ -139,7 +139,7 @@ public class Display {
             driver.update(bitBuffer);
         }
     }
-    
+
     public void shutdown() {
         this.shutdown = true;
     }
