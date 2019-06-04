@@ -310,7 +310,7 @@ public class Font {
     }
 
     private static class GNU_Unifont_16 {
-        private static final Font FONT = new Font("fonts/gnu-unibit-16-font");
+        private static final Font FONT = new Font("fonts/gnu-unifont-16-font");
         static {
             // Make this font proportional, since Latin1 chars have width 16x8, and CJK have width 16x16
             FONT.defaultStyle.setCharSpacing(CharSpacing.PROPORTIONAL);
