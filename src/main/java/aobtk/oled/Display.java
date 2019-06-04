@@ -112,6 +112,35 @@ public class Display {
         }
     }
 
+    /** Get the screen contents as a bit buffer, 1bpp, in row major order. */
+    public byte[] getBitBuffer() {
+        try {
+            update();
+        } catch (IOException e) {
+        }
+        return bitBuffer;
+    }
+
+    /**
+     * Set the screen contents from a bit buffer.
+     * 
+     * @throws IOException
+     */
+    public void setFromBitBuffer(byte[] bitBuffer) throws IOException {
+        if (bitBuffer.length != OLEDDriver.DISPLAY_WIDTH * OLEDDriver.DISPLAY_HEIGHT / 8) {
+            throw new IllegalArgumentException("Bit buffer is wrong length");
+        }
+        for (int y = 0; y < OLEDDriver.DISPLAY_HEIGHT; y++) {
+            for (int x = 0; x < OLEDDriver.DISPLAY_WIDTH; x++) {
+                int addr = x + y * OLEDDriver.DISPLAY_WIDTH;
+                byte pix = (bitBuffer[x + (y >> 3) * OLEDDriver.DISPLAY_WIDTH] & (1 << (y & 0x07))) != 0 ? (byte) 1
+                        : (byte) 0;
+                pixBuffer[addr] = pix;
+            }
+        }
+        update();
+    }
+
     /**
      * Send the current buffer to the display.
      * 
