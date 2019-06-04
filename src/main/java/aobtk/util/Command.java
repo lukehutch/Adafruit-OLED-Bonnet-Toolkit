@@ -77,8 +77,8 @@ public class Command {
      * Run a command, passing each line of stdout or stderr to the given consumer. If the thread is interrupted, the
      * child process is killed.
      */
-    public static TaskResult<Integer> commandWithConsumer(String cmd, Consumer<String> lineConsumer,
-            boolean consumeStderr, TaskExecutor executor) throws CommandException {
+    public static TaskResult<Integer> commandWithConsumer(String cmd, TaskExecutor executor,
+            boolean consumeStderr, Consumer<String> lineConsumer) throws CommandException {
         Process process;
         try {
             System.out.println("CMD: " + cmd);
@@ -155,17 +155,17 @@ public class Command {
      * Run a command, passing each line of stdout or stderr to the given consumer. If the thread is interrupted, the
      * child process is killed.
      */
-    public static TaskResult<Integer> commandWithConsumer(String cmd, Consumer<String> lineConsumer,
-            boolean consumeStderr) throws CommandException {
-        return commandWithConsumer(cmd, lineConsumer, consumeStderr, CMD_EXECUTOR);
+    public static TaskResult<Integer> commandWithConsumer(String cmd, boolean consumeStderr,
+            Consumer<String> lineConsumer) throws CommandException {
+        return commandWithConsumer(cmd, CMD_EXECUTOR, consumeStderr, lineConsumer);
     }
 
     public static List<String> command(String cmd, TaskExecutor executor)
             throws CommandException, InterruptedException, CancellationException {
         // Call command, and collect result lines
         List<String> result = new ArrayList<>();
-        TaskResult<Integer> statusCodeResult = commandWithConsumer(cmd, result::add, /* consumeStderr = */ false,
-                executor);
+        TaskResult<Integer> statusCodeResult = commandWithConsumer(cmd, executor, /* consumeStderr = */ false,
+                result::add);
 
         // Wait for termination, and get status code
         int statusCode;

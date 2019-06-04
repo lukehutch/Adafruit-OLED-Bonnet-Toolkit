@@ -43,8 +43,8 @@ public enum HWButton {
     GpioPinDigitalInput digitalInput;
 
     /** Test whether a given button is currently down. */
-    public static boolean buttonDown(HWButton button) {
-        return Bonnet.buttonDownMap.getOrDefault(button, Boolean.FALSE);
+    public boolean isDown() {
+        return Bonnet.buttonDownMap.getOrDefault(this, Boolean.FALSE);
     }
 
     HWButton(Pin pin) {

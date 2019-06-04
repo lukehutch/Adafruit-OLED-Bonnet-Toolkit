@@ -36,6 +36,7 @@ import java.util.concurrent.Semaphore;
 
 import aobtk.hw.Bonnet;
 import aobtk.hw.HWButton;
+import aobtk.i18n.Str;
 import aobtk.oled.Display;
 import aobtk.ui.element.UIElement;
 import aobtk.util.TaskExecutor;
@@ -145,34 +146,36 @@ public abstract class Screen {
 
     /** Set current screen. */
     public static void setCurrScreen(Screen newCurrScreen) {
-        synchronized (currScreenLock) {
-            if (newCurrScreen != currScreen && newCurrScreen != null) {
-                // Hold UI lock so that screen switching doesn't happen in the middle of a screen update
-                synchronized (uiLock) {
-                    if (currScreen != null) {
-                        // Close current screen
-                        currScreen.close();
+        if (newCurrScreen != null) {
+            synchronized (currScreenLock) {
+                if (newCurrScreen != currScreen && newCurrScreen != null) {
+                    // Hold UI lock so that screen switching doesn't happen in the middle of a screen update
+                    synchronized (uiLock) {
+                        if (currScreen != null) {
+                            // Close current screen
+                            currScreen.close();
 
-                        // Cancel any pending jobs in current screen that currScreen.close() did not cancel
-                        currScreen.taskExecutor.cancelAllPendingJobs();
+                            // Cancel any pending jobs in current screen that currScreen.close() did not cancel
+                            currScreen.taskExecutor.cancelAllPendingJobs();
+                        }
                     }
+
+                    // Open newCurrScreen (any repaint() will be ignored until currScreen is set below)
+                    newCurrScreen.open();
+
+                    // Set currScreen to newCurrScreen
+                    currScreen = newCurrScreen;
+
+                    // Schedule initial repaint of newCurrScreen 
+                    repaint();
                 }
-
-                // Open newCurrScreen (any repaint() will be ignored until currScreen is set below)
-                newCurrScreen.open();
-
-                // Set currScreen to newCurrScreen
-                currScreen = newCurrScreen;
-
-                // Schedule initial repaint of newCurrScreen 
-                repaint();
             }
         }
     }
 
     public void goToParentScreen() {
         synchronized (currScreenLock) {
-            if (currScreen != null) {
+            if (currScreen != null && currScreen.parentScreen != null) {
                 setCurrScreen(currScreen.parentScreen);
             }
         }
@@ -188,7 +191,7 @@ public abstract class Screen {
         return currScreen.taskExecutor.submitWait(milliseconds).then(() -> {
             synchronized (currScreenLock) {
                 // Check currScreen has not changed while waiting
-                if (currScreen == Screen.this) {
+                if (currScreen == Screen.this && newCurrScreen != null) {
                     setCurrScreen(newCurrScreen);
                 }
             }
@@ -199,7 +202,7 @@ public abstract class Screen {
         return currScreen.taskExecutor.submitWait(milliseconds).then(() -> {
             synchronized (currScreenLock) {
                 // Check currScreen has not changed while waiting
-                if (currScreen == Screen.this) {
+                if (currScreen == Screen.this && currScreen.parentScreen != null) {
                     setCurrScreen(currScreen.parentScreen);
                 }
             }
@@ -221,6 +224,12 @@ public abstract class Screen {
 
     /** A button was pressed. */
     public static void buttonPressed(HWButton button, boolean down) {
+        if (button == HWButton.C && down) {
+            Str.lang = (Str.lang + 1) % 3; // @@TODO temp
+            repaint();
+            return;
+        }
+
         // Only send button down events to current screen
         if (down) {
             synchronized (currScreenLock) {

@@ -51,6 +51,7 @@ class ImportFonts {
                 /* outputFileName = */ "gnu-unifont-16-font", /* maxGlyphW = */ 16, /* maxGlyphH = */ 16);
     }
 
+    // TODO: the 'i' character is one pixel lower than the rest of the font
     private static void importLiberationSansFont() throws IOException {
         File dir = new File("font-src/wqy-bitmapfont-1.0.0RC1");
         if (!dir.exists()) {

@@ -39,8 +39,8 @@ import aobtk.oled.Display;
 import aobtk.ui.measurement.Size;
 
 public class TableLayout extends UIElement {
-    private int rowSpacing;
-    private int colSpacing;
+    private int spacingY;
+    private int spacingX;
     private List<List<UIElement>> tableElements = new ArrayList<>();
 
     private Size tableDim;
@@ -59,18 +59,18 @@ public class TableLayout extends UIElement {
         LEFT, CENTER, RIGHT
     }
 
-    public TableLayout(int rowSpacing, int colSpacing) {
-        this.rowSpacing = rowSpacing;
-        this.colSpacing = colSpacing;
+    public TableLayout(int spacingX, int spacingY) {
+        this.spacingY = spacingY;
+        this.spacingX = spacingX;
     }
 
-    public TableLayout(int rowSpacing, int colSpacing, List<List<UIElement>> tableElements) {
-        this(rowSpacing, colSpacing);
+    public TableLayout(int spacingX, int spacingY, List<List<UIElement>> tableElements) {
+        this(spacingX, spacingY);
         this.tableElements = tableElements;
     }
 
-    public TableLayout(int rowSpacing, int colSpacing, UIElement[]... tableElements) {
-        this(rowSpacing, colSpacing);
+    protected TableLayout(int spacingX, int spacingY, UIElement[]... tableElements) {
+        this(spacingX, spacingY);
         for (UIElement[] rowElements : tableElements) {
             this.tableElements.add(Arrays.asList(rowElements));
         }
@@ -92,26 +92,31 @@ public class TableLayout extends UIElement {
         tableElements.clear();
     }
 
-    public void add(int row, int col, UIElement uiElement) {
-        while (tableElements.size() < row + 1) {
+    public void add(int cellX, int cellY, UIElement uiElement) {
+        while (tableElements.size() < cellY + 1) {
             tableElements.add(new ArrayList<>());
         }
-        List<UIElement> rowElements = tableElements.get(row);
-        while (rowElements.size() < col + 1) {
+        List<UIElement> rowElements = tableElements.get(cellY);
+        while (rowElements.size() < cellX + 1) {
             rowElements.add(null);
         }
-        rowElements.set(col, uiElement);
+        rowElements.set(cellX, uiElement);
     }
 
-    /** Add a row of UIElements. */
-    public void add(int row, UIElement... uiElements) {
-        for (int col = 0; col < uiElements.length; col++) {
-            add(row, col, uiElements[col]);
+    /** Add a row of UIElements at the specified row in the table. */
+    public void add(int rowY, UIElement... uiElements) {
+        for (int x = 0; x < uiElements.length; x++) {
+            add(x, rowY, uiElements[x]);
         }
     }
 
-    public void addSpace(int row, int col, int w, int h) {
-        add(row, col, new Spacer(w, h));
+    /** Add a row of UIElements at the bottom of the table. */
+    public void add(UIElement... uiElements) {
+        add(tableElements.size(), uiElements);
+    }
+
+    public void addSpace(int cellX, int cellY, int w, int h) {
+        add(cellX, cellY, new Spacer(w, h));
     }
 
     /** Set the default layout gravity for the whole table, for items that don't fill an entire table cell. */
@@ -123,28 +128,28 @@ public class TableLayout extends UIElement {
      * Set the default layout gravity for a column, for items that don't fill an entire table cell. Column gravity
      * overrides row gravity and table gravity settings.
      */
-    public void setColumnGravity(int col, Align gravity) {
+    public void setColumnGravity(int columnX, Align gravity) {
         if (columnGravity == null) {
             columnGravity = new ArrayList<>();
         }
-        while (columnGravity.size() < col + 1) {
+        while (columnGravity.size() < columnX + 1) {
             columnGravity.add(null);
         }
-        columnGravity.set(col, gravity);
+        columnGravity.set(columnX, gravity);
     }
 
     /**
      * Set the default layout gravity for a row, for items that don't fill an entire table cell. Row gravity
      * overrides table gravity settings.
      */
-    public void setRowGravity(int row, Align gravity) {
+    public void setRowGravity(int rowY, Align gravity) {
         if (rowGravity == null) {
             rowGravity = new ArrayList<>();
         }
-        while (rowGravity.size() < row + 1) {
+        while (rowGravity.size() < rowY + 1) {
             rowGravity.add(null);
         }
-        rowGravity.set(row, gravity);
+        rowGravity.set(rowY, gravity);
     }
 
     /** Get the number of columns and rows in the table. */
@@ -156,12 +161,12 @@ public class TableLayout extends UIElement {
         return new Size(maxRowWidth, tableElements.size());
     }
 
-    /** Get the table element at the given row and column. */
-    public UIElement get(int row, int col) {
-        if (row >= 0 && row < tableElements.size()) {
-            List<UIElement> rowElements = tableElements.get(row);
-            if (col >= 0 && col < rowElements.size()) {
-                return rowElements.get(col);
+    /** Get the table element at the given column and row. */
+    public UIElement get(int cellX, int cellY) {
+        if (cellY >= 0 && cellY < tableElements.size()) {
+            List<UIElement> rowElements = tableElements.get(cellY);
+            if (cellX >= 0 && cellX < rowElements.size()) {
+                return rowElements.get(cellX);
             }
         }
         return null;
@@ -192,7 +197,7 @@ public class TableLayout extends UIElement {
         for (int col = 0; col < tableDim.w; col++) {
             int maxWidthForCol = 0;
             for (int row = 0; row < tableDim.h; row++) {
-                UIElement elt = get(row, col);
+                UIElement elt = get(col, row);
                 if (elt != null) {
                     elt.measure(remainingMaxW, maxH);
                     maxWidthForCol = Math.max(maxWidthForCol, elt.size.w);
@@ -201,14 +206,14 @@ public class TableLayout extends UIElement {
             colWidths.set(col, maxWidthForCol);
             remainingMaxW = Math.max(0, remainingMaxW - maxWidthForCol);
             if (col < tableDim.w - 1) {
-                remainingMaxW = Math.max(0, remainingMaxW - colSpacing);
+                remainingMaxW = Math.max(0, remainingMaxW - spacingX);
             }
         }
         int remainingMaxH = maxH;
         for (int row = 0; row < tableDim.h; row++) {
             int maxHeightForRow = 0;
             for (int col = 0; col < tableDim.w; col++) {
-                UIElement elt = get(row, col);
+                UIElement elt = get(col, row);
                 if (elt != null) {
                     elt.measure(maxW, remainingMaxH);
                     maxHeightForRow = Math.max(maxHeightForRow, elt.size.h);
@@ -217,7 +222,7 @@ public class TableLayout extends UIElement {
             rowHeights.set(row, maxHeightForRow);
             remainingMaxH = Math.max(0, remainingMaxH - maxHeightForRow);
             if (row < tableDim.h - 1) {
-                remainingMaxH = Math.max(0, remainingMaxH - rowSpacing);
+                remainingMaxH = Math.max(0, remainingMaxH - spacingY);
             }
         }
 
@@ -225,7 +230,7 @@ public class TableLayout extends UIElement {
         for (int row = 0; row < tableDim.h; row++) {
             int rowHeight = rowHeights.get(row);
             for (int col = 0; col < tableDim.w; col++) {
-                UIElement elt = get(row, col);
+                UIElement elt = get(col, row);
                 if (elt != null) {
                     int colWidth = colWidths.get(col);
                     elt.measure(colWidth, rowHeight);
@@ -245,23 +250,24 @@ public class TableLayout extends UIElement {
                 int xCurr = x;
                 int rowHeight = rowHeights.get(row);
                 for (int col = 0; col < tableDim.w; col++) {
-                    UIElement elt = get(row, col);
+                    UIElement elt = get(col, row);
                     if (elt != null) {
                         int colWidth = colWidths.get(col);
                         Align eltGravity = null;
                         if (columnGravity != null && col < columnGravity.size()) {
                             eltGravity = columnGravity.get(col);
                         }
-                        if (tableGravity == null && rowGravity != null && row < rowGravity.size()) {
+                        if (eltGravity == null && rowGravity != null && row < rowGravity.size()) {
                             eltGravity = rowGravity.get(row);
                         }
-                        if (tableGravity == null) {
+                        if (eltGravity == null) {
                             eltGravity = tableGravity;
                         }
-                        int cropW = Math.max(colWidth, elt.size.w);
-                        int cropH = Math.max(rowHeight, elt.size.h);
-                        int leftoverW = colWidth = cropW;
-                        int leftoverH = rowHeight = cropH;
+
+                        int cropW = Math.min(colWidth, elt.size.w);
+                        int cropH = Math.min(rowHeight, elt.size.h);
+                        int leftoverW = Math.max(0, colWidth - elt.size.w);
+                        int leftoverH = Math.max(0, rowHeight - elt.size.h);
                         int xDisp = xCurr;
                         if (eltGravity == Align.N || eltGravity == Align.CENTER || eltGravity == Align.S) {
                             xDisp += leftoverW / 2;
@@ -277,13 +283,13 @@ public class TableLayout extends UIElement {
                         elt.render(xDisp, yDisp, cropW, cropH, display);
                         xCurr += colWidth;
                         if (col < tableDim.w - 1 && xCurr - x < maxW) {
-                            xCurr += colSpacing;
+                            xCurr += spacingX;
                         }
                     }
                 }
                 yCurr += rowHeight;
                 if (row < tableDim.h - 1 && yCurr - y < maxH) {
-                    yCurr += rowSpacing;
+                    yCurr += spacingY;
                 }
             }
         }
