@@ -418,6 +418,10 @@ public class Font {
         return defaultStyle.copy();
     }
 
+    public FontStyle getDefaultStyle() {
+        return defaultStyle;
+    }
+
     /** Get all the characters defined in the font. */
     public ArrayList<FontChar> getFontChars() {
         ArrayList<FontChar> fontChars = new ArrayList<>(charToFontChar.values());
