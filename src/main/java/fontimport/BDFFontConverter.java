@@ -169,25 +169,25 @@ class BDFFontConverter {
         int[] charPix = new int[charPixStride * maxGlyphH * 2];
 
         // Read chars
-        int fontBBH = 0;
+        // int fontBBH = 0;
         int fontBBDX = 0;
         int fontBBDY = 0;
-        int fontAscent = 0;
-        int fontDescent = 0;
+        // int fontAscent = 0;
+        // int fontDescent = 0;
         List<String> lines = Files.readAllLines(inputFile.toPath());
         for (int i = 0; i < lines.size(); i++) {
             String line = lines.get(i);
             if (line.startsWith("FONTBOUNDINGBOX")) {
                 String[] parts = line.substring(16).split(" ");
-                fontBBH = Integer.parseInt(parts[1]);
+                // fontBBH = Integer.parseInt(parts[1]);
                 fontBBDX = Integer.parseInt(parts[2]);
                 fontBBDY = Integer.parseInt(parts[3]);
 
             } else if (line.startsWith("FONT_DESCENT")) {
-                fontDescent = Integer.parseInt(line.substring(13));
+                // fontDescent = Integer.parseInt(line.substring(13));
 
             } else if (line.startsWith("FONT_ASCENT")) {
-                fontAscent = Integer.parseInt(line.substring(12));
+                // fontAscent = Integer.parseInt(line.substring(12));
 
             } else if (line.startsWith("STARTCHAR")) {
                 String charName = line.substring(10);
