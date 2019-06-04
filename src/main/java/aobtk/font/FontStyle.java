@@ -152,7 +152,6 @@ public class FontStyle {
         }
         
         Size renderedSize = new Size(Math.min(renderedW, maxW), Math.min(renderedH, maxH));
-        System.out.println(string + " " + x + " " + y + " " + maxW + " " + maxH + " " + renderedSize);
         if (display != null) {
             if (highlight == FontStyle.Highlight.BLOCK) {
                 display.invertBlock(x - 1, y - 1, renderedSize.w + 2, renderedSize.h + 2);
