@@ -31,7 +31,7 @@ public class RootScreen extends Screen {
 
         layout.add(new TextElement(Font.PiOLED_5x8().newStyle(), "Choose Wisely"), VAlign.TOP);
 
-        menu = new Menu(Font.WenQuanYi_16().newStyle(), /* spacing = */ 4, /* hLayout = */ true, RED_PILL,
+        menu = new Menu(Font.WQY_Song_16().newStyle(), /* spacing = */ 4, /* hLayout = */ true, RED_PILL,
                 BLUE_PILL);
         layout.add(menu, VAlign.CENTER);
 

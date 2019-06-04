@@ -37,6 +37,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -114,17 +116,33 @@ public class Font {
         }
     }
 
-    /**
-     * <a href="http://wenq.org/wqy2/index.cgi?BitmapSong_en">WenQueanYi Song</a> 12x12 font, supporting many
-     * Unicode characters, and CJK unified ideographs, but not Hangeul (only {@link Font#WenQuanYi_16()} and
-     * {@link Font#WenQuanYi_16_bold()} support Hangeul).
-     */
-    public static Font WenQuanYi_12() {
-        return WenQuanYi_12.FONT;
+    /** Liberation Sans bitmap font, with support for European and Cyrillic scripts, and some Unicode symbols. */
+    public static Font LiberationSans_16() {
+        return LiberationSans_16.FONT;
     }
 
-    private static class WenQuanYi_12 {
-        private static final Font FONT = new Font("fonts/wqy-12-font");
+    private static class LiberationSans_16 {
+        private static final Font FONT = new Font("fonts/liberation-sans-16-font");
+        static {
+            // Take as little space as possible
+            FONT.defaultStyle.setCharSpacing(CharSpacing.PROPORTIONAL);
+            // Need to pad X, but this font is designed to be compact, and its vertical axis nicely divides
+            // 48 pixel rows, so don't pad Y by default.
+            FONT.defaultStyle.setPadX(1);
+        }
+    }
+
+    /**
+     * <a href="http://wenq.org/wqy2/index.cgi?BitmapSong_en">WenQuanYi Song</a> 12x12 font, supporting many Unicode
+     * characters, and CJK unified ideographs, but not Hangeul (only {@link Font#WQY_Song_16()} and
+     * {@link Font#WQY_Song_16_bold()} support Hangeul).
+     */
+    public static Font WQY_Song_12() {
+        return WQY_Song_12.FONT;
+    }
+
+    private static class WQY_Song_12 {
+        private static final Font FONT = new Font("fonts/wqy-song-12-font");
         static {
             // Make this font proportional, otherwise Latin1 chars are spaced way too far apart.
             FONT.defaultStyle.setCharSpacing(CharSpacing.PROPORTIONAL);
@@ -134,16 +152,16 @@ public class Font {
     }
 
     /**
-     * <a href="http://wenq.org/wqy2/index.cgi?BitmapSong_en">WenQueanYi Song</a> 12x12 bold font, supporting many
-     * Unicode characters, and CJK unified ideographs, but not Hangeul (only {@link Font#WenQuanYi_16()} and
-     * {@link Font#WenQuanYi_16_bold()} support Hangeul).
+     * <a href="http://wenq.org/wqy2/index.cgi?BitmapSong_en">WenQuanYi Song</a> 12x12 bold font, supporting many
+     * Unicode characters, and CJK unified ideographs, but not Hangeul (only {@link Font#WQY_Song_16()} and
+     * {@link Font#WQY_Song_16_bold()} support Hangeul).
      */
-    public static Font WenQuanYi_12_bold() {
-        return WenQuanYi_12_bold.FONT;
+    public static Font WQY_Song_12_bold() {
+        return WQY_Song_12_bold.FONT;
     }
 
-    private static class WenQuanYi_12_bold {
-        private static final Font FONT = new Font("fonts/wqy-12-bold-font");
+    private static class WQY_Song_12_bold {
+        private static final Font FONT = new Font("fonts/wqy-song-12-bold-font");
         static {
             // Make this font proportional, otherwise Latin1 chars are spaced way too far apart
             FONT.defaultStyle.setCharSpacing(CharSpacing.PROPORTIONAL);
@@ -153,16 +171,16 @@ public class Font {
     }
 
     /**
-     * <a href="http://wenq.org/wqy2/index.cgi?BitmapSong_en">WenQueanYi Song</a> 13x13 font, supporting many
-     * Unicode characters, and CJK unified ideographs, but not Hangeul (only {@link Font#WenQuanYi_16()} and
-     * {@link Font#WenQuanYi_16_bold()} support Hangeul).
+     * <a href="http://wenq.org/wqy2/index.cgi?BitmapSong_en">WenQuanYi Song</a> 13x13 font, supporting many Unicode
+     * characters, and CJK unified ideographs, but not Hangeul (only {@link Font#WQY_Song_16()} and
+     * {@link Font#WQY_Song_16_bold()} support Hangeul).
      */
-    public static Font WenQuanYi_13() {
-        return WenQuanYi_13.FONT;
+    public static Font WQY_Song_13() {
+        return WQY_Song_13.FONT;
     }
 
-    private static class WenQuanYi_13 {
-        private static final Font FONT = new Font("fonts/wqy-13-font");
+    private static class WQY_Song_13 {
+        private static final Font FONT = new Font("fonts/wqy-song-13-font");
         static {
             // Make this font proportional, otherwise Latin1 chars are spaced way too far apart
             FONT.defaultStyle.setCharSpacing(CharSpacing.PROPORTIONAL);
@@ -172,16 +190,16 @@ public class Font {
     }
 
     /**
-     * <a href="http://wenq.org/wqy2/index.cgi?BitmapSong_en">WenQueanYi Song</a> 13x13 bold font, supporting many
-     * Unicode characters, and CJK unified ideographs, but not Hangeul (only {@link Font#WenQuanYi_16()} and
-     * {@link Font#WenQuanYi_16_bold()} support Hangeul).
+     * <a href="http://wenq.org/wqy2/index.cgi?BitmapSong_en">WenQuanYi Song</a> 13x13 bold font, supporting many
+     * Unicode characters, and CJK unified ideographs, but not Hangeul (only {@link Font#WQY_Song_16()} and
+     * {@link Font#WQY_Song_16_bold()} support Hangeul).
      */
-    public static Font WenQuanYi_13_bold() {
-        return WenQuanYi_13_bold.FONT;
+    public static Font WQY_Song_13_bold() {
+        return WQY_Song_13_bold.FONT;
     }
 
-    private static class WenQuanYi_13_bold {
-        private static final Font FONT = new Font("fonts/wqy-13-bold-font");
+    private static class WQY_Song_13_bold {
+        private static final Font FONT = new Font("fonts/wqy-song-13-bold-font");
         static {
             // Make this font proportional, otherwise Latin1 chars are spaced way too far apart
             FONT.defaultStyle.setCharSpacing(CharSpacing.PROPORTIONAL);
@@ -191,16 +209,16 @@ public class Font {
     }
 
     /**
-     * <a href="http://wenq.org/wqy2/index.cgi?BitmapSong_en">WenQueanYi Song</a> 15x15 font, supporting many
-     * Unicode characters, and CJK unified ideographs, but not Hangeul (only {@link Font#WenQuanYi_16()} and
-     * {@link Font#WenQuanYi_16_bold()} support Hangeul).
+     * <a href="http://wenq.org/wqy2/index.cgi?BitmapSong_en">WenQuanYi Song</a> 15x15 font, supporting many Unicode
+     * characters, and CJK unified ideographs, but not Hangeul (only {@link Font#WQY_Song_16()} and
+     * {@link Font#WQY_Song_16_bold()} support Hangeul).
      */
-    public static Font WenQuanYi_15() {
-        return WenQuanYi_15.FONT;
+    public static Font WQY_Song_15() {
+        return WQY_Song_15.FONT;
     }
 
-    private static class WenQuanYi_15 {
-        private static final Font FONT = new Font("fonts/wqy-15-font");
+    private static class WQY_Song_15 {
+        private static final Font FONT = new Font("fonts/wqy-song-15-font");
         static {
             // Make this font proportional, otherwise Latin1 chars are spaced way too far apart
             FONT.defaultStyle.setCharSpacing(CharSpacing.PROPORTIONAL);
@@ -210,16 +228,16 @@ public class Font {
     }
 
     /**
-     * <a href="http://wenq.org/wqy2/index.cgi?BitmapSong_en">WenQueanYi Song</a> 15x15 bold font, supporting many
-     * Unicode characters, and CJK unified ideographs, but not Hangeul (only {@link Font#WenQuanYi_16()} and
-     * {@link Font#WenQuanYi_16_bold()} support Hangeul).
+     * <a href="http://wenq.org/wqy2/index.cgi?BitmapSong_en">WenQuanYi Song</a> 15x15 bold font, supporting many
+     * Unicode characters, and CJK unified ideographs, but not Hangeul (only {@link Font#WQY_Song_16()} and
+     * {@link Font#WQY_Song_16_bold()} support Hangeul).
      */
-    public static Font WenQuanYi_15_bold() {
-        return WenQuanYi_15_bold.FONT;
+    public static Font WQY_Song_15_bold() {
+        return WQY_Song_15_bold.FONT;
     }
 
-    private static class WenQuanYi_15_bold {
-        private static final Font FONT = new Font("fonts/wqy-15-bold-font");
+    private static class WQY_Song_15_bold {
+        private static final Font FONT = new Font("fonts/wqy-song-15-bold-font");
         static {
             // Make this font proportional, otherwise Latin1 chars are spaced way too far apart
             FONT.defaultStyle.setCharSpacing(CharSpacing.PROPORTIONAL);
@@ -228,16 +246,16 @@ public class Font {
         }
     }
 
-    public static Font WenQuanYi_16() {
-        return WenQuanYi_16.FONT;
+    /**
+     * <a href="http://wenq.org/wqy2/index.cgi?BitmapSong_en">WenQuanYi Song</a> 16x16 font, supporting many Unicode
+     * characters, CJK unified ideographs, and Hangeul.
+     */
+    public static Font WQY_Song_16() {
+        return WQY_Song_16.FONT;
     }
 
-    /**
-     * <a href="http://wenq.org/wqy2/index.cgi?BitmapSong_en">WenQueanYi Song</a> 16x16 font, supporting many
-     * Unicode characters, CJK unified ideographs, and Hangeul.
-     */
-    private static class WenQuanYi_16 {
-        private static final Font FONT = new Font("fonts/wqy-16-font");
+    private static class WQY_Song_16 {
+        private static final Font FONT = new Font("fonts/wqy-song-16-font");
         static {
             // Make this font proportional, otherwise Latin1 chars are spaced way too far apart
             FONT.defaultStyle.setCharSpacing(CharSpacing.PROPORTIONAL);
@@ -246,18 +264,55 @@ public class Font {
         }
     }
 
-    public static Font WenQuanYi_16_bold() {
-        return WenQuanYi_16_bold.FONT;
+    /**
+     * <a href="http://wenq.org/wqy2/index.cgi?BitmapSong_en">WenQuanYi Song</a> 16x16 bold font, supporting many
+     * Unicode characters, CJK unified ideographs, and Hangeul.
+     */
+    public static Font WQY_Song_16_bold() {
+        return WQY_Song_16_bold.FONT;
+    }
+
+    private static class WQY_Song_16_bold {
+        private static final Font FONT = new Font("fonts/wqy-song-16-bold-font");
+        static {
+            // Make this font proportional, otherwise Latin1 chars are spaced way too far apart
+            FONT.defaultStyle.setCharSpacing(CharSpacing.PROPORTIONAL);
+            FONT.defaultStyle.setPadX(1);
+            // Don't pad Y, since 16 pixels high fits 4 rows on a 48 pixel row display
+        }
     }
 
     /**
-     * <a href="http://wenq.org/wqy2/index.cgi?BitmapSong_en">WenQueanYi Song</a> 16x16 bold font, supporting many
-     * Unicode characters, CJK unified ideographs, and Hangeul.
+     * <a href="http://wenq.org/wqy2/index.cgi?Unibit">WenQuanYi Unibit</a> 16x16 font, supporting most of Unicode.
+     * Similar to {@link GNU_Unifont} for CJK (since 10,000 characters from WanQuanYi Unibit were merged into GNU
+     * Unifont), but has a different Latin1 style.
      */
-    private static class WenQuanYi_16_bold {
-        private static final Font FONT = new Font("fonts/wqy-16-bold-font");
+    public static Font WQY_Unibit_16() {
+        return WQY_Unibit_16.FONT;
+    }
+
+    private static class WQY_Unibit_16 {
+        private static final Font FONT = new Font("fonts/wqy-unibit-16-font");
         static {
-            // Make this font proportional, otherwise Latin1 chars are spaced way too far apart
+            // Make this font proportional, since Latin1 chars have width 16x8, and CJK have width 16x16
+            FONT.defaultStyle.setCharSpacing(CharSpacing.PROPORTIONAL);
+            FONT.defaultStyle.setPadX(1);
+            // Don't pad Y, since 16 pixels high fits 4 rows on a 48 pixel row display
+        }
+    }
+
+    /**
+     * <a href="http://unifoundry.com/unifont/index.html">GNU Unifont</a> 16x16 font, supporting every printable
+     * code point in the Unicode Basic Multilingual Plane (BMP).
+     */
+    public static Font GNU_Unifont_16() {
+        return GNU_Unifont_16.FONT;
+    }
+
+    private static class GNU_Unifont_16 {
+        private static final Font FONT = new Font("fonts/gnu-unibit-16-font");
+        static {
+            // Make this font proportional, since Latin1 chars have width 16x8, and CJK have width 16x16
             FONT.defaultStyle.setCharSpacing(CharSpacing.PROPORTIONAL);
             FONT.defaultStyle.setPadX(1);
             // Don't pad Y, since 16 pixels high fits 4 rows on a 48 pixel row display
@@ -296,7 +351,7 @@ public class Font {
                     int h = in.readByte() & 0xff;
                     int nominalWidth = in.readByte() & 0xff;
                     int byteOffset = in.readInt();
-                    FontChar charInfo = new FontChar(x, y, w, h, nominalWidth, byteOffset);
+                    FontChar charInfo = new FontChar(c, x, y, w, h, nominalWidth, byteOffset);
                     charToFontChar.put(c, charInfo);
                     totPixBitsLen += charInfo.getCharPixBitsLen();
                 }
@@ -348,5 +403,12 @@ public class Font {
 
     public FontStyle newStyle() {
         return defaultStyle.copy();
+    }
+
+    /** Get all the characters defined in the font. */
+    public ArrayList<FontChar> getFontChars() {
+        ArrayList<FontChar> fontChars = new ArrayList<>(charToFontChar.values());
+        Collections.sort(fontChars);
+        return fontChars;
     }
 }

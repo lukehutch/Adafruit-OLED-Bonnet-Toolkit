@@ -1,0 +1,27 @@
+ver="0.9.9.NB";
+New();
+Reencode("iso10646-1");
+
+Import("GNU_Unifont_169pt.pcf");
+Import("GNU_Unifont_1610pt.pcf");
+Import("GNU_Unifont_1611pt.pcf");
+Import("GNU_Unifont_1612pt.pcf");
+Import("GNU_Unifont_1613px.pcf");
+
+SetGasp([8,2,16,1,65535,3]);
+SetFontNames("WenQuanYiBitmapSong","WenQuanYi Bitmap Song","WenQuanYi Bitmap Song","Regular","Copyright (C) 2005-2009 Qianqian Fang and WenQuanYi Board of Trustees",ver);
+SetTTFName(1033,1,"WenQuanYi Bitmap Song");
+SetTTFName(1033,4,"WenQuanYi Bitmap Song");
+SetTTFName(1033,2,"Regular");
+SetTTFName(1028,1,"文泉驛點陣宋體"); # tw
+SetTTFName(1028,4,"文泉驛點陣宋體");
+SetTTFName(4100,1,"文泉驿点阵宋体"); # singapore
+SetTTFName(4100,4,"文泉驿点阵宋体");
+SetTTFName(2052,1,"文泉驿点阵宋体"); # simplified chinese
+SetTTFName(2052,4,"文泉驿点阵宋体");
+SetTTFName(5124,1,"文泉驛點陣宋體"); # mo
+SetTTFName(5124,4,"文泉驛點陣宋體");
+SetTTFName(3076,1,"文泉驛點陣宋體"); # hk
+SetTTFName(3076,4,"文泉驛點陣宋體");
+Generate("wqy-bsong-"+ver+".ttf","ttf");
+Close();

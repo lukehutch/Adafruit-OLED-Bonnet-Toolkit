@@ -155,7 +155,7 @@ class ImportNeoDGMFont {
                     charPix[x + y * 16] = (bytes[x * 2 + (y >> 3)] & (1 << (y & 7))) != 0 ? 1 : 0;
                 }
             }
-            charToCharInfo.put(chr, new FontChar(0, 0, w, h, w, charPix, 16));
+            charToCharInfo.put(chr, new FontChar(chr, 0, 0, w, h, w, charPix, 16));
         }
         new File("src/main/resources/fonts").mkdir();
         String savePath = "src/main/resources/fonts/neodgm-16-font";

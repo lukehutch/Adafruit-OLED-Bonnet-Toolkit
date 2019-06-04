@@ -33,17 +33,26 @@ package aobtk.font;
 
 import aobtk.oled.Display;
 
-public class FontChar {
-    /** X-offset to plot character's defined pixels at, relative to character start position. */
+public class FontChar implements Comparable<FontChar> {
+    /** The character */
+    public final char chr;
+
+    /**
+     * X-offset to plot character's defined pixels at, relative to character start position, after stripping away
+     * blank columns to left of glyph.
+     */
     public int glyphPosX;
 
-    /** Y-offset to plot character's defined pixels at, relative to character start position. */
+    /**
+     * Y-offset to plot character's defined pixels at, relative to character start position, after stripping away
+     * blank rows above glyph.
+     */
     public int glyphPosY;
 
-    /** Width of pixels defined in character. */
+    /** Width of pixels defined in character, after stripping away blank columns before and after glyph. */
     public final int glyphW;
 
-    /** Height of pixels defined in character. */
+    /** Height of pixels defined in character, after stripping away blank rows above and below glyph. */
     public final int glyphH;
 
     /** The nominal display width of the character. */
@@ -61,7 +70,9 @@ public class FontChar {
     /** Start index of character data in charPixBits. */
     private int charPixBitsStartIdx;
 
-    public FontChar(int glyphPosX, int glyphPosY, int glyphW, int glyphH, int nominalW, int charPixBitsStartIdx) {
+    public FontChar(char chr, int glyphPosX, int glyphPosY, int glyphW, int glyphH, int nominalW,
+            int charPixBitsStartIdx) {
+        this.chr = chr;
         this.glyphPosX = glyphPosX;
         this.glyphPosY = glyphPosY;
         this.glyphW = glyphW;
@@ -71,8 +82,10 @@ public class FontChar {
     }
 
     /** Initialize a character from a larger int[] pixel grid, with one pixel per int. */
-    public FontChar(int glyphPosX, int glyphPosY, int glyphW, int glyphH, int nominalW, int[] pixels, int stride) {
-        super();
+    public FontChar(char chr, int glyphPosX, int glyphPosY, int glyphW, int glyphH, int nominalW, int[] pixels,
+            int stride) {
+        this.chr = chr;
+        this.nominalW = nominalW;
 
         // Find outermost pixels of glyph. This allows the glyph to be compressed by storing only the contents
         // of the innermost bounding box of the glyph. It also allows the font to be displayed as proportional
@@ -108,7 +121,6 @@ public class FontChar {
         this.glyphPosY = glyphPosY + minY;
         this.glyphW = maxX - minX + (firstPixelFound ? 1 : 0);
         this.glyphH = maxY - minY + (firstPixelFound ? 1 : 0);
-        this.nominalW = nominalW;
         this.charPixBits = new byte[getCharPixBitsLen()];
 
         // Pack pixels into bit array
@@ -213,5 +225,10 @@ public class FontChar {
             System.out.print("──");
         }
         System.out.println('┘');
+    }
+
+    @Override
+    public int compareTo(FontChar o) {
+        return Character.compare(this.chr, o.chr);
     }
 }

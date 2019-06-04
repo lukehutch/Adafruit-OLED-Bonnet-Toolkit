@@ -21,7 +21,7 @@ public class BluePillScreen extends Screen {
 
     @Override
     public void open() {
-        setUI(new VLayout(new TextElement(Font.WenQuanYi_16_bold().newStyle(), BLUE_PILL)));
+        setUI(new VLayout(new TextElement(Font.WQY_Song_16_bold().newStyle(), BLUE_PILL)));
 
         // There's no going back to parent (parentScreen is null, and additionally button A is overridden)
         waitThenGoToParentScreen(/* milliseconds = */ 3000);

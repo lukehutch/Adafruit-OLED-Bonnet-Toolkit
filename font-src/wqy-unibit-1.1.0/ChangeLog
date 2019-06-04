@@ -1,0 +1,19 @@
+========================================================== 
+
+                 Wen Quan Yi Unibit
+
+                     ChangeLog
+----------------------------------------------------------
+
+WenQuanYi Unibit ChangeLog:
+2007/09/14(1.1.0): Qianqian Fang (fangq#nmr.mgh.harvard.edu)
+          1. fixed a bug in the merging script, resulting in 81
+             more glyphs in 0xFF00 - 0xFFFD
+          2. editorial changes to README
+
+2007/09/09(1.0.0): Qianqian Fang (fangq#nmr.mgh.harvard.edu)
+          1. initial release
+          2. merging bitmap glyphs from China national standard 
+             GB19966-2005 with GNU Unifont and Fixed-16x8.
+
+========================================================== 

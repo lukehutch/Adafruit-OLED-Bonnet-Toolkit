@@ -1,0 +1,133 @@
+========================================================== 
+
+            Wen Quan Yi Unibit Bitmap Font
+
+                    Release Notes
+
+----------------------------------------------------------
+
+Summary:
+
+    Developer: The WenQuanYi Project Contributors
+    Webpage  : http://wqy.sourceforge.net/en/
+    Font Name: WenQuanYi Unibit
+    Version  : 1.0
+    Release  : 1
+    Copyright: (C) 2007, Qianqian Fang and the WenQuanYi Project 
+               Board of Trustees
+    License  : GPL v2.0 (with font embedding exception **)
+
+----------------------------------------------------------
+
+          May the Font be with you, forever!
+
+----------------------------------------------------------
+
+Table of Content
+
+ I.   Introduction
+ II.  About "The WenQuanYi Project"
+ III. Links to Open-source CJK font resources
+
+----------------------------------------------------------
+
+ I. Introduction
+
+The Wen Quan Yi Unibit is designed as a dual-width (16x16,16x8) 
+bitmap font to provide the most complete international symbol 
+coverage, serving as the system-wide fall-back font. This font 
+has covered more than 46000 Unicode code points in BMP.
+It is intended to supersede the outdated GNU Unifont.
+
+This font was created by merging the latest update of GNU 
+Unifont [GPL] (by Roman Czyborra and David Starner et al., the 
+font was last updated in 2004), WenQuanYi Bitmap Song [GPL] 
+0.8.1 (by Qianqian Fang and WenQuanYi contributors) and 
+Fixed-16x8 [public domain] bitmap fonts from X11 core fonts. 
+The entire CJK Unified Ideographics (U4E00-U9FA5) and CJK Unified 
+Ideographics Extension A(U3400-U4DB5) blocks were replaced by 
+high-quality glyphs from China National Standard GB19966-2005 
+(public domain). Near a thousand of non-CJK characters were improved by 
+WenQuanYi contributors via their collaborative font editing website at
+
+    http://wenq.org/eindex.cgi?Unicode_Chart_EN
+
+You are welcome to logon this website and modify/add glyphs to this 
+font.
+
+----------------------------------------------------------
+
+ II. About The WenQuanYi Project
+
+The Wen Quan Yi Project was created by Qianqian Fang[8] in 
+Oct. 2004. The goal of this project is to enrich open-source 
+Chinese software/resources and construct an open language
+platform for Eastern Asia (Chinese, Japanese and Korean etc) 
+open source communities. The initial focus of the project is
+to create high quality bitmap character glyphs and outline 
+fonts for all 70,000+ CJK characters currently encoded 
+by the Unicode Consortium. 
+
+The Wen Quan Yi Project use Wiki[1] as the primary 
+development tool for glyph creation, documentation
+and coordinations. The Wen Quan Yi wiki also supports
+glyph CVS and nightly build.
+
+The embodiment of the project consists of a 
+"Steering Committee" by the core members, a "Team B" 
+for bitmap Chinese font development and a "Team V" 
+for outline font development. Need to mention, a large 
+number of anonymous contributors also participate our 
+development through our Wiki website and their 
+contributions are non-negligible.
+
+----------------------------------------------------------
+
+ III. Links to Open-source CJK font resources
+
+
+[1] The WenQuanYi Project Homepage
+      http://wqy.sourceforge.net/            (Chinese version)
+      http://wqy.sourceforge.net/en/         (English version)
+      http://sourceforge.net/projects/wqy/   (Sourceforge project)
+      http://wenq.org/                       (Development site)
+      http://wenq.org/forum/                 (User forum)
+      http://lwfs.net/cgi-bin/               (CERNET mirror)
+
+[2] Firefly bitmap font
+      http://www.study-area.org/apt/firefly-font/
+
+[3] Chinese National Standard GB19966-2005 (mandatory)
+     http://www.standardcn.com/standard_plan/list_standard_content.asp?
+              stand_id=GB19966-2005
+
+[4] Arphic Public License
+     http://ftp.gnu.org/gnu/non-gnu/chinese-fonts-truetype/LICENSE
+
+[5] Unifonts Project
+     http://www.freedesktop.org/wiki/Software_2fCJKUnifonts
+
+[6] Open Source Hong Kong Fonts Project
+     http://freefonts.oaka.org/en/index.php/Main_Page
+
+[7] The Unicode Consortium
+     http://www.unicode.org/
+
+[8] Qianqian Fang homepage
+     http://nmr.mgh.harvard.edu/~fangq/
+
+
+** GPL v2.0 license with font embedding exception:
+
+As a special exception, if you create a document which uses this
+font, and embed this font or unaltered portions of this font into 
+the document, this font does not by itself cause the resulting 
+document to be covered by the GNU General Public License. This 
+exception does not however invalidate any other reasons why the 
+document might be covered by the GNU General Public License. If you 
+modify this font, you may extend this exception to your version of 
+the font, but you are not obligated to do so. If you do not wish to 
+do so, delete this exception statement from your version.
+
+
+========================================================== 

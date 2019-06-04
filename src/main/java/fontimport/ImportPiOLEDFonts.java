@@ -54,12 +54,12 @@ class ImportPiOLEDFonts {
 
         CharsetDecoder decoder = Charset.forName("IBM-437").newDecoder();
         byte[] array = new byte[1];
-        
+
         List<String> lines = Files.readAllLines(file.toPath());
         int[] charPix = new int[8 * 8];
         for (int i = 0; i < lines.size(); i++) {
             String line = lines.get(i);
-            
+
             // Characters are in cp437 (or something similar -- some of the high-bit-set glyphs
             // map to the wrong character)
             array[0] = (byte) (charStart + i);
@@ -75,7 +75,7 @@ class ImportPiOLEDFonts {
                     }
                 }
             }
-            charToCharInfo.put(chr, new FontChar(0, 0, w, h, w, charPix, 8));
+            charToCharInfo.put(chr, new FontChar(chr, 0, 0, w, h, w, charPix, 8));
         }
 
         // Save font to disk

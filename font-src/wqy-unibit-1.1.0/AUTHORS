@@ -1,0 +1,116 @@
+========================================================== 
+
+          Wen Quan Yi Bitmap Song CJK Fonts
+
+               Contributors and Credits
+
+----------------------------------------------------------
+Email confusers:
+   replace " #" to "@" , replace " _" to "."
+----------------------------------------------------------
+
+Summary: 
+
+ This font package is copyrighted by the WenQuanYi Board of Trustees 2004-2007
+               http://wenq.org/index.cgi?WQYBOT
+----------------------------------------------------------
+
+Table of Content
+
+ I.  Pevious Work
+ II. WenQuanYi Bitmap Font developers
+ III.Other resources
+
+----------------------------------------------------------
+
+ I. Previous Work:
+
+   Chinese National Standard GB19966-2005
+                     provided all 12pt face CJK glyphs between U4E00-U9FA5 and
+                     CJK Extension A: U3400-U4DB5
+                     http://www.standardcn.com/standard_plan/
+                        list_standard_content.asp?stand_id=GB19966-2005
+
+   Unifont Project   Roman Czyborra (roman #czyborra _com)
+                     provided 12pt bold face Korean Hangul glyphs
+                     http://czyborra.com/unifont/
+
+   Fixed-16x8 pcf font (public domain)
+
+----------------------------------------------------------
+
+ II .WenQuanYi Bitmap Font developers
+
+Core members
+
+   Qianqian Fang[FangQ] (fangq #nmr _mgh _harvard _edu)
+
+                     project creator and maintainer, wiki developer,
+                     web master, offline tool programer, release manager,
+                     major font developer, reviewer
+
+                     http://nmr.mgh.harvard.edu/~fangq/
+                     http://bbs.dartmouth.edu/~fangq/blog/
+
+   Hong Wang     (hongclean #gmail _com)
+
+                     key contributor, major reviewer
+
+   Qian Cai[caiqian]*    (caiqian #gmail _com)
+
+                     creator of WenQuanYi bitmap font standard
+
+   Funda Wang[fundawang]*(fundawang #linux _net _cn)
+
+                     key developer, technical support
+                     http://my.opera.com/fundawang/
+
+   Kefu Chai[tchaikov]    (tchaikov #sjtu _edu _cn)
+
+                     web development, major reviewer
+
+   Jinming Liu[ailantian]*(ailantian #email _jlu _edu _cn)
+
+                     key developer for vector Chinese project
+                     http://ailantian.blogchina.com
+
+   Haitao Han[niqiu]*     (chenniqiu #gmail _com)
+
+                     key developer for vector Chinese project
+                     http://www.livejournal.com/~niqiu/
+
+   Qing Lei[fiag]*        (fiag.hit #gmail _com)
+
+                     key developer for vector Chinese project
+
+   Nicolas Wang[ZaiJianQingRen]  (abcxyz54321 #163 _com)
+
+                     key contributor, major reviewer
+
+   * the status is inactive
+
+
+----------------------------------------------------------
+
+ III. Other resources
+
+Webspace provider:
+
+     Sourceforge provided free webspace and great tools to help
+                   the development: http://sf.net/
+     Dartmouth Chinese Student&Scholar Association (DCSSA) 
+                   provided webspace for holding the pictures
+                   of each character (which is huge)
+
+Wiki development:
+
+     Qianqian Fang developed the wiki cgi program for the project,
+     which is built on TtHWiki writen by Andreas Bilger. TtHWiki is 
+     modified from UseModWiki writen by Clifford Adams
+
+     The font editor was writen by Qianqian Fang
+
+     The font editor previewer is written by Chai Kov
+     (tchaikov #sjtu _edu _cn)
+
+========================================================== 

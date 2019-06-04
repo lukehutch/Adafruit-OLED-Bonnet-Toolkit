@@ -36,15 +36,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import aobtk.font.Font;
 import aobtk.font.FontChar;
-
-import java.util.TreeMap;
 
 class SaveableFont extends Font {
     /**
@@ -61,41 +57,35 @@ class SaveableFont extends Font {
                 BufferedOutputStream bos = new BufferedOutputStream(fos);
                 DataOutputStream out = new DataOutputStream(bos)) {
 
-            TreeMap<Character, FontChar> sortedMap = new TreeMap<>(charToFontChar);
-            List<Entry<Character, FontChar>> entries = new ArrayList<>(sortedMap.entrySet());
-            int numChars = entries.size();
+            List<FontChar> fontChars = getFontChars();
 
-            // Visualize entries
-            for (int i = 0; i < entries.size(); i++) {
-                Entry<Character, FontChar> ent = entries.get(i);
-                FontChar charInfo = ent.getValue();
-                System.out.println("\nChar " + ent.getKey() + " (" + Integer.toString(ent.getKey(), 16) + "):");
-                charInfo.printGrid();
+            // Visualize characters in font
+            for (FontChar fontChar : fontChars) {
+                System.out.println("\nChar " + fontChar.chr + " (" + Integer.toString(fontChar.chr, 16) + "):");
+                fontChar.printGrid();
             }
 
             // Concatenate the pixel bytes from all characters
+            int numChars = fontChars.size();
             int[] byteOffset = new int[numChars];
             ByteArrayOutputStream charPixels = new ByteArrayOutputStream();
-            for (int i = 0; i < entries.size(); i++) {
-                Entry<Character, FontChar> ent = entries.get(i);
+            for (int i = 0; i < fontChars.size(); i++) {
+                FontChar fontChar = fontChars.get(i);
                 byteOffset[i] = charPixels.size();
-                FontChar charInfo = ent.getValue();
-                byte[] charPixBits = charInfo.getCharPixBits();
-                charPixels.write(charPixBits, charInfo.getCharPixBitsStartIdx(), charInfo.getCharPixBitsLen());
+                byte[] charPixBits = fontChar.getCharPixBits();
+                charPixels.write(charPixBits, fontChar.getCharPixBitsStartIdx(), fontChar.getCharPixBitsLen());
             }
 
             // Write out character metadata
             out.writeInt(numChars);
-            for (int i = 0; i < entries.size(); i++) {
-                Entry<Character, FontChar> ent = entries.get(i);
-                Character c = ent.getKey();
-                FontChar charInfo = ent.getValue();
-                out.writeChar(c);
-                out.writeByte(charInfo.glyphPosX);
-                out.writeByte(charInfo.glyphPosY);
-                out.writeByte(charInfo.glyphW);
-                out.writeByte(charInfo.glyphH);
-                out.writeByte(charInfo.nominalW);
+            for (int i = 0; i < fontChars.size(); i++) {
+                FontChar fontChar = fontChars.get(i);
+                out.writeChar(fontChar.chr);
+                out.writeByte(fontChar.glyphPosX);
+                out.writeByte(fontChar.glyphPosY);
+                out.writeByte(fontChar.glyphW);
+                out.writeByte(fontChar.glyphH);
+                out.writeByte(fontChar.nominalW);
                 out.writeInt(byteOffset[i]);
             }
 
