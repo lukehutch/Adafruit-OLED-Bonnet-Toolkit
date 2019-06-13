@@ -77,11 +77,11 @@ public class Command {
      * Run a command, passing each line of stdout or stderr to the given consumer. If the thread is interrupted, the
      * child process is killed.
      */
-    public static TaskResult<Integer> commandWithConsumer(String cmd, TaskExecutor executor,
+    public static TaskResult<Integer> commandWithConsumer(String[] cmd, TaskExecutor executor,
             boolean consumeStderr, Consumer<String> lineConsumer) throws CommandException {
         Process process;
         try {
-            System.out.println("CMD: " + cmd);
+            System.out.println("CMD: " + String.join(" ", cmd));
             process = Runtime.getRuntime().exec(cmd);
         } catch (IOException | SecurityException e) {
             throw new CommandException(e);
@@ -100,7 +100,8 @@ public class Command {
                         lineConsumer.accept(line);
                         if (Thread.currentThread().isInterrupted()) {
                             interrupted.set(true);
-                            System.out.println("Child process was destroyed by thread interruption: " + cmd);
+                            System.out.println(
+                                    "Child process was destroyed by thread interruption: " + String.join(" ", cmd));
                             process.destroy();
                             cancellationCheckerExecutor.shutdown();
                         }
@@ -117,7 +118,8 @@ public class Command {
                         try (BufferedReader reader = new BufferedReader(
                                 new InputStreamReader(process.getErrorStream()))) {
                             for (String line; (line = reader.readLine()) != null;) {
-                                System.out.println("  **** stderr output from " + cmd + ": " + line);
+                                System.out.println(
+                                        "  **** stderr output from " + String.join(" ", cmd) + ": " + line);
                             }
                         } catch (IOException e2) {
                             // Ignore
@@ -142,7 +144,7 @@ public class Command {
             }
             if (taskResult.isCanceled()) {
                 interrupted.set(true);
-                System.out.println("Child process was destroyed by thread interruption: " + cmd);
+                System.out.println("Child process was destroyed by thread interruption: " + String.join(" ", cmd));
                 process.destroy();
             }
             return null;
@@ -155,12 +157,12 @@ public class Command {
      * Run a command, passing each line of stdout or stderr to the given consumer. If the thread is interrupted, the
      * child process is killed.
      */
-    public static TaskResult<Integer> commandWithConsumer(String cmd, boolean consumeStderr,
+    public static TaskResult<Integer> commandWithConsumer(String[] cmd, boolean consumeStderr,
             Consumer<String> lineConsumer) throws CommandException {
         return commandWithConsumer(cmd, CMD_EXECUTOR, consumeStderr, lineConsumer);
     }
 
-    public static List<String> command(String cmd, TaskExecutor executor)
+    public static List<String> command(String[] cmd, TaskExecutor executor)
             throws CommandException, InterruptedException, CancellationException {
         // Call command, and collect result lines
         List<String> result = new ArrayList<>();
@@ -176,14 +178,14 @@ public class Command {
         }
         if (statusCode != 0) {
             // If status code was not 0, throw CommandException
-            throw new CommandException("Got exit code " + statusCode + " for command " + cmd);
+            throw new CommandException("Got exit code " + statusCode + " for command " + String.join(" ", cmd));
         }
 
         // If status code was 0, return result lines
         return result;
     }
 
-    public static List<String> command(String cmd)
+    public static List<String> command(String[] cmd)
             throws CommandException, InterruptedException, CancellationException {
         return command(cmd, CMD_EXECUTOR);
     }
