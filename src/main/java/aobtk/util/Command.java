@@ -73,6 +73,17 @@ public class Command {
         private static final long serialVersionUID = 1L;
     }
 
+    private static String join(String[] cmd) {
+        StringBuilder buf = new StringBuilder();
+        for (int i = 0; i < cmd.length; i++) {
+            if (buf.length() > 0) {
+                buf.append(' ');
+            }
+            buf.append(cmd[i]);
+        }
+        return buf.toString();
+    }
+
     /**
      * Run a command, passing each line of stdout or stderr to the given consumer. If the thread is interrupted, the
      * child process is killed.
@@ -81,7 +92,7 @@ public class Command {
             boolean consumeStderr, Consumer<String> lineConsumer) throws CommandException {
         Process process;
         try {
-            System.out.println("CMD: " + String.join(" ", cmd));
+            System.out.println("CMD: \"" + join(cmd) + "\"");
             process = Runtime.getRuntime().exec(cmd);
         } catch (IOException | SecurityException e) {
             throw new CommandException(e);
@@ -101,7 +112,7 @@ public class Command {
                         if (Thread.currentThread().isInterrupted()) {
                             interrupted.set(true);
                             System.out.println(
-                                    "Child process was destroyed by thread interruption: " + String.join(" ", cmd));
+                                    "Child process was destroyed by thread interruption: \"" + join(cmd) + "\"");
                             process.destroy();
                             cancellationCheckerExecutor.shutdown();
                         }
@@ -119,7 +130,7 @@ public class Command {
                                 new InputStreamReader(process.getErrorStream()))) {
                             for (String line; (line = reader.readLine()) != null;) {
                                 System.out.println(
-                                        "  **** stderr output from " + String.join(" ", cmd) + ": " + line);
+                                        "  **** stderr output from \"" + join(cmd) + "\": " + line);
                             }
                         } catch (IOException e2) {
                             // Ignore
@@ -144,7 +155,7 @@ public class Command {
             }
             if (taskResult.isCanceled()) {
                 interrupted.set(true);
-                System.out.println("Child process was destroyed by thread interruption: " + String.join(" ", cmd));
+                System.out.println("Child process was destroyed by thread interruption: \"" + join(cmd) + "\"");
                 process.destroy();
             }
             return null;
@@ -178,7 +189,7 @@ public class Command {
         }
         if (statusCode != 0) {
             // If status code was not 0, throw CommandException
-            throw new CommandException("Got exit code " + statusCode + " for command " + String.join(" ", cmd));
+            throw new CommandException("Got exit code " + statusCode + " for command \"" + join(cmd) + "\"");
         }
 
         // If status code was 0, return result lines
