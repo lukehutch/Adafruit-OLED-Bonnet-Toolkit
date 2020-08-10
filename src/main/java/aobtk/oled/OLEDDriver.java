@@ -153,10 +153,18 @@ public class OLEDDriver {
      * @throws             com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException
      */
     public OLEDDriver(int busNumber, int displayAddress) throws IOException, UnsupportedBusNumberException {
+        StringBuilder buf = new StringBuilder();
+        buf.append("Available I2C device addresses:");
+        for (int busId : I2CFactory.getBusIds()) {
+            buf.append(" 0x" + Integer.toString(busId, 16));
+        }
+        LOGGER.log(Level.INFO, buf.toString());
+        LOGGER.log(Level.INFO, "Opening I2C bus, address 0x" + Integer.toString(busNumber, 16));
+        
         bus = I2CFactory.getInstance(busNumber);
         device = bus.getDevice(displayAddress);
 
-        LOGGER.log(Level.FINE, "Opened i2c bus");
+        LOGGER.log(Level.FINE, "Opened I2C bus");
 
         clear();
 
