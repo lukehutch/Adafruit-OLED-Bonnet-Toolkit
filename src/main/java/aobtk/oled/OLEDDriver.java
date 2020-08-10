@@ -160,10 +160,10 @@ public class OLEDDriver {
         }
         buf.append("Available I2C device addresses:");
         for (int busId : busIds) {
-            buf.append(" 0x" + Integer.toString(busId, 16));
+            buf.append(String.format(" 0x%02x", busId));
             LOGGER.log(Level.INFO, buf.toString());
         }
-        LOGGER.log(Level.INFO, "Opening I2C bus, address 0x" + Integer.toString(busNumber, 16));
+        LOGGER.log(Level.INFO, String.format("Opening I2C bus, address 0x%02x", busNumber));
         bus = I2CFactory.getInstance(busNumber);
         device = bus.getDevice(displayAddress);
 
