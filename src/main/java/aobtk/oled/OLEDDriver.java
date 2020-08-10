@@ -156,18 +156,18 @@ public class OLEDDriver {
         StringBuilder buf = new StringBuilder();
         int[] busIds = I2CFactory.getBusIds();
         if (busIds == null) {
-            throw new IOException("Could not find any I2C devices (is I2C enabled?) -- extiting");
+            throw new IOException("Could not find any I2C buses (is I2C enabled?)");
         }
-        buf.append("Available I2C device addresses:");
+        buf.append("Available I2C buses:");
         for (int busId : busIds) {
-            buf.append(String.format(" 0x%02x", busId));
-            LOGGER.log(Level.INFO, buf.toString());
+            buf.append(String.format(" %d", busId));
+            LOGGER.log(Level.FINE, buf.toString());
         }
-        LOGGER.log(Level.INFO, String.format("Opening I2C bus, address 0x%02x", busNumber));
+
+        LOGGER.log(Level.FINE, String.format("Opening I2C bus, address %d", busNumber));
         bus = I2CFactory.getInstance(busNumber);
         device = bus.getDevice(displayAddress);
-
-        LOGGER.log(Level.FINE, "Opened I2C bus");
+        LOGGER.log(Level.FINE, String.format("Opened I2C bus %d, device 0x%02x", busNumber, displayAddress));
 
         clear();
 
