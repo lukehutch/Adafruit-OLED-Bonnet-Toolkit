@@ -43,8 +43,6 @@ import com.pi4j.io.i2c.I2CDevice;
 import com.pi4j.io.i2c.I2CFactory;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
-import aobtk.util.NativeUtils;
-
 /**
  * A raspberry pi driver for the 128x64 pixel OLED display (i2c bus). The supported kind of display uses the SSD1306
  * driver chip and is connected to the raspberry's i2c bus (bus 1).
@@ -124,15 +122,6 @@ public class OLEDDriver {
 
     private final I2CBus bus;
     private final I2CDevice device;
-
-    static {
-        // Ensure Pi4J is loaded (if Maven Shade is used, libpi4j's own mechanism fails)
-        try {
-            NativeUtils.loadLibraryFromJar("lib/nanopi/dynamic/libpi4j.so");
-        } catch (IOException e) {
-            System.err.println("Could not load libpi4j.so library from jar");
-        }
-    }
     
     /**
      * creates an oled display object with default i2c bus 1 and default display address of 0x3C
