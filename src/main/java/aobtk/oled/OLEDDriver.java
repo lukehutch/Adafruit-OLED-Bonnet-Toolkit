@@ -127,7 +127,7 @@ public class OLEDDriver {
      * creates an oled display object with default i2c bus 1 and default display address of 0x3C
      *
      * @throws IOException
-     * @throws             com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException
+     * @throws com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException
      */
     public OLEDDriver() throws IOException, UnsupportedBusNumberException {
         this(DEFAULT_I2C_BUS, DEFAULT_DISPLAY_ADDRESS);
@@ -138,7 +138,7 @@ public class OLEDDriver {
      *
      * @param displayAddress the i2c bus address of the display
      * @throws IOException
-     * @throws             com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException
+     * @throws com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException
      */
     public OLEDDriver(int displayAddress) throws IOException, UnsupportedBusNumberException {
         this(DEFAULT_I2C_BUS, displayAddress);
@@ -150,17 +150,20 @@ public class OLEDDriver {
      * @param busNumber      the i2c bus number (use constants from I2CBus)
      * @param displayAddress the i2c bus address of the display
      * @throws IOException
-     * @throws             com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException
+     * @throws com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException
      */
     public OLEDDriver(int busNumber, int displayAddress) throws IOException, UnsupportedBusNumberException {
         StringBuilder buf = new StringBuilder();
-        buf.append("Available I2C device addresses:");
-        for (int busId : I2CFactory.getBusIds()) {
-            buf.append(" 0x" + Integer.toString(busId, 16));
+        int[] busIds = I2CFactory.getBusIds();
+        if (busIds == null) {
+            throw new IOException("Could not find any I2C devices (is I2C enabled?) -- extiting");
         }
-        LOGGER.log(Level.INFO, buf.toString());
+        buf.append("Available I2C device addresses:");
+        for (int busId : busIds) {
+            buf.append(" 0x" + Integer.toString(busId, 16));
+            LOGGER.log(Level.INFO, buf.toString());
+        }
         LOGGER.log(Level.INFO, "Opening I2C bus, address 0x" + Integer.toString(busNumber, 16));
-        
         bus = I2CFactory.getInstance(busNumber);
         device = bus.getDevice(displayAddress);
 
