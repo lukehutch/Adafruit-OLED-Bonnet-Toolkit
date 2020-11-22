@@ -10,9 +10,6 @@ import aobtk.ui.screen.Screen;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        // Initialize the Button class, and register the GPIO event listeners
-        Bonnet.init();
-
         // Start with ChooseLangScreen
         Screen.init(new ChooseLangScreen());
 

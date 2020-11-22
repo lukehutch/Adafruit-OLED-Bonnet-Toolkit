@@ -38,10 +38,8 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.pi4j.io.i2c.I2CBus;
-import com.pi4j.io.i2c.I2CDevice;
-import com.pi4j.io.i2c.I2CFactory;
-import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
+import aobtk.hw.Bonnet;
+import aobtk.hw.I2CDevice;
 
 /**
  * A raspberry pi driver for the 128x64 pixel OLED display (i2c bus). The supported kind of display uses the SSD1306
@@ -63,7 +61,7 @@ import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
  * 
  * <p/>
  * Also note that it is possible to speed up the refresh rate of the display up to ~60fps by adding the following to
- * the config.txt of your raspberry: dtparam=i2c1_baudrate=1000000
+ * the /boot/config.txt of your raspberry: dtparam=i2c_baudrate=1000000
  * 
  * <p/>
  * This class is basically a rough port of Adafruit's BSD licensed SSD1306 library
@@ -73,9 +71,9 @@ import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
  */
 @SuppressWarnings("unused")
 public class OLEDDriver {
-    private static final Logger LOGGER = Logger.getLogger(OLEDDriver.class.getCanonicalName());
+    private I2CDevice i2cDev;
 
-    private static final int DEFAULT_I2C_BUS = I2CBus.BUS_1;
+    private static final int DEFAULT_I2C_BUS = 1;
     private static final int DEFAULT_DISPLAY_ADDRESS = 0x3C;
 
     public static final int DISPLAY_WIDTH = 128;
@@ -120,16 +118,14 @@ public class OLEDDriver {
     private static final byte SSD1306_EXTERNALVCC = (byte) 0x1;
     private static final byte SSD1306_SWITCHCAPVCC = (byte) 0x2;
 
-    private final I2CBus bus;
-    private final I2CDevice device;
-    
+    private static final Logger LOGGER = Logger.getLogger(OLEDDriver.class.getCanonicalName());
+
     /**
      * creates an oled display object with default i2c bus 1 and default display address of 0x3C
      *
      * @throws IOException
-     * @throws com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException
      */
-    public OLEDDriver() throws IOException, UnsupportedBusNumberException {
+    public OLEDDriver() {
         this(DEFAULT_I2C_BUS, DEFAULT_DISPLAY_ADDRESS);
     }
 
@@ -138,9 +134,8 @@ public class OLEDDriver {
      *
      * @param displayAddress the i2c bus address of the display
      * @throws IOException
-     * @throws com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException
      */
-    public OLEDDriver(int displayAddress) throws IOException, UnsupportedBusNumberException {
+    public OLEDDriver(int displayAddress) {
         this(DEFAULT_I2C_BUS, displayAddress);
     }
 
@@ -150,49 +145,27 @@ public class OLEDDriver {
      * @param busNumber      the i2c bus number (use constants from I2CBus)
      * @param displayAddress the i2c bus address of the display
      * @throws IOException
-     * @throws com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException
      */
-    public OLEDDriver(int busNumber, int displayAddress) throws IOException, UnsupportedBusNumberException {
-        StringBuilder buf = new StringBuilder();
-        int[] busIds = I2CFactory.getBusIds();
-        if (busIds == null) {
-            throw new IOException("Could not find any I2C buses (is I2C enabled?)");
+    public OLEDDriver(int busNumber, int displayAddress) {
+        i2cDev = Bonnet.openI2CDevice(busNumber, displayAddress);
+        try {
+            switchOn();
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "IOException trying to switch on display", e);
+            Bonnet.shutdown();
+            System.exit(1);
         }
-        buf.append("Available I2C buses:");
-        for (int busId : busIds) {
-            buf.append(String.format(" %d", busId));
-            LOGGER.log(Level.FINE, buf.toString());
-        }
-
-        LOGGER.log(Level.FINE, String.format("Opening I2C bus, address %d", busNumber));
-        bus = I2CFactory.getInstance(busNumber);
-        device = bus.getDevice(displayAddress);
-        LOGGER.log(Level.FINE, String.format("Opened I2C bus %d, device 0x%02x", busNumber, displayAddress));
-
-        clear();
-
-        // add shutdown hook that clears the display
-        // and closes the bus correctly when the software
-        // is terminated.
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                shutdown();
-            }
-        });
-
-        init();
     }
 
     public synchronized void clear() throws IOException {
         update(BLANK_BUFFER);
     }
 
-    private void writeCommand(byte command) throws IOException {
-        device.write(0x00, command);
+    private void writeCommand(byte cmd) throws IOException {
+        i2cDev.writeRegister(0x00, cmd);
     }
 
-    private void init() throws IOException {
+    private void switchOn() throws IOException {
         writeCommand(SSD1306_DISPLAYOFF); // 0xAE
         writeCommand(SSD1306_SETDISPLAYCLOCKDIV); // 0xD5
         writeCommand((byte) 0x80); // the suggested ratio 0x80
@@ -223,6 +196,11 @@ public class OLEDDriver {
         writeCommand(SSD1306_DISPLAYON); // -- turn on OLED panel
     }
 
+    private void switchOff() throws IOException {
+        clear();
+        writeCommand(SSD1306_DISPLAYOFF); // -- turn off OLED panel
+    }
+
     /**
      * sends the current buffer to the display
      * 
@@ -243,19 +221,16 @@ public class OLEDDriver {
 
         for (int i = 0; i < ((DISPLAY_WIDTH * DISPLAY_HEIGHT / 8) / 16); i++) {
             // send a bunch of data in one transmission
-            device.write((byte) 0x40, imageBuffer, i * 16, 16);
+            i2cDev.writeRegister(0x40, imageBuffer, i * 16, 16);
         }
     }
 
     public synchronized void shutdown() {
         try {
-            // before we shut down we clear the display
-            clear();
-
-            // now we close the bus
-            bus.close();
-        } catch (IOException ex) {
-            LOGGER.log(Level.FINE, "Closing i2c bus");
+            // before we shut down we clear the display and switch it off
+            switchOff();
+        } catch (IOException e) {
+            LOGGER.log(Level.FINE, "Exception closing i2c bus", e);
         }
     }
 }

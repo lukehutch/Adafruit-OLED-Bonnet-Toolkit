@@ -31,17 +31,23 @@
  */
 package aobtk.hw;
 
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import com.pi4j.io.gpio.GpioController;
-import com.pi4j.io.gpio.GpioFactory;
-import com.pi4j.io.gpio.PinPullResistance;
-import com.pi4j.io.gpio.PinState;
-import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
-import com.pi4j.io.gpio.event.GpioPinListenerDigital;
-import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
+import com.pi4j.Pi4J;
+import com.pi4j.context.Context;
+import com.pi4j.exception.LifecycleException;
+import com.pi4j.exception.Pi4JException;
+import com.pi4j.io.gpio.digital.DigitalInput;
+import com.pi4j.io.gpio.digital.DigitalState;
+import com.pi4j.io.gpio.digital.DigitalStateChangeEvent;
+import com.pi4j.io.gpio.digital.DigitalStateChangeListener;
+import com.pi4j.io.gpio.digital.PullResistance;
 
 import aobtk.oled.Display;
 import aobtk.oled.OLEDDriver;
@@ -49,49 +55,80 @@ import aobtk.ui.screen.Screen;
 import aobtk.util.TaskExecutor;
 
 public class Bonnet {
+    private static final Logger LOGGER = Logger.getLogger(Bonnet.class.getCanonicalName());
 
-    public static final OLEDDriver oledDriver;
+    // Initialize the class -- for some reason a static initializer block is never called (JDK bug?)
+    @SuppressWarnings("unused")
+    private static Bonnet bonnet = new Bonnet();
 
-    static {
-        try {
-            // Initialize OLED screen
-            oledDriver = new OLEDDriver();
-        } catch (IOException | UnsupportedBusNumberException e) {
-            throw new RuntimeException("Could not start OLED driver", e);
-        }
-    }
+    public static Context pi4j;
 
-    public static final Display display = new Display(oledDriver);
-
-    public static final GpioController GPIO = GpioFactory.getInstance();
+    private static HWButton[] hwButtons;
 
     /** Whether or not each button is currently down. (Updated by GPIO pin state change listener thread.) */
     public static final Map<HWButton, Boolean> buttonDownMap = new ConcurrentHashMap<HWButton, Boolean>();
 
-    /**
-     * Initialize the hardwarer bonnet, adding a {@link HWButtonListener} for button events.
-     */
-    public static void init() {
+    static Set<I2CDevice> i2cDevices = Collections.newSetFromMap(new ConcurrentHashMap<>());
+
+    public static OLEDDriver oledDriver = new OLEDDriver();
+    public static Display display = new Display(oledDriver);
+
+    private Bonnet() {
+        System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "TRACE");
+        LOGGER.log(Level.INFO, "Initializing Bonnet");
+        try {
+            pi4j = Pi4J.newAutoContext();
+            if (pi4j == null) {
+                throw new Pi4JException("Could not get new auto context");
+            }
+        } catch (Pi4JException e) {
+            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Could not get Pi4J context", e);
+            shutdown();
+            System.exit(1);
+        }
+
+        try {
+            hwButtons = HWButton.values();
+        } catch (Exception e) {
+            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Could not open GPIO bus", e);
+            shutdown();
+            System.exit(1);
+        }
+        
+
+//        for (int pin = 0; pin < 31; pin++) {
+//            try {
+//                int pinNum = pin;
+//                DigitalInput digitalInput = Bonnet.pi4j
+//                        .create(DigitalInput.newConfigBuilder(Bonnet.pi4j).id("gpio-pin-" + pin).name("Pin #" + pin)
+//                                .address(pin).pull(PullResistance.PULL_UP).build());
+//                digitalInput.addListener(new DigitalStateChangeListener() {
+//                    @Override
+//                    public void onDigitalStateChange(DigitalStateChangeEvent event) {
+//                        System.out.println("GPIO pin " + pinNum + " state change");
+//                    }
+//                });
+//            } catch (Exception e) {
+//                System.err.println("Could not set up digital input " + pin + ": " + e);
+//            }
+//        }
+
+
         // Wire up buttons to listener
         for (HWButton button : HWButton.values()) {
-            // Provision GPIO pin as an input pin with its internal pull up resistor enabled
-            button.digitalInput = Bonnet.GPIO.provisionDigitalInputPin(button.pin, PinPullResistance.PULL_UP);
-
-            // Set shutdown state for this input pin
-            button.digitalInput.setShutdownOptions(true);
-
             // Register gpio pin listener
-            button.digitalInput.addListener(new GpioPinListenerDigital() {
-                @Override
-                public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
-                    boolean down = event.getState() == PinState.LOW;
-                    buttonDownMap.put(button, down);
-                    Screen.buttonPressed(button, down);
-                }
+            button.digitalInput.addListener(e -> {
+                boolean down = e.state() == DigitalState.LOW;
+                buttonDownMap.put(button, down);
+                Screen.buttonPressed(button, down);
             });
         }
 
-        // Add shutdown hook for clean shutdown
+        // add shutdown hook that clears the display
+        // and closes the bus correctly when the software
+        // is terminated.
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
@@ -100,42 +137,67 @@ public class Bonnet {
         });
     }
 
+    public static I2CDevice openI2CDevice(int busNum, int deviceAddr) {
+        var i2cDevice = new I2CDevice(busNum, deviceAddr);
+        return i2cDevice;
+    }
+
     public static void shutdown() {
+        LOGGER.log(Level.INFO, "Shutting down");
+
         // Shut down all task executors
         TaskExecutor.shutdownAll();
 
-        // Remove button listeners
-        for (HWButton b : HWButton.values()) {
-            if (b.digitalInput != null) {
-                try {
-                    b.digitalInput.removeAllListeners();
-                } catch (Exception e) {
-                    // Ignore
-                }
-                b.digitalInput = null;
-            }
-        }
-
-        // Stop all GPIO activity/threads by shutting down the GPIO controller
-        // (forcefully shuts down all GPIO monitoring threads and scheduled tasks)
-        try {
-            GPIO.shutdown();
-        } catch (Exception e) {
-            // Ignore
-        }
-
         // Stop writing to display before shutting down the display hardware
-        try {
-            display.shutdown();
-        } catch (Exception e) {
-            // Ignore
+        if (display != null) {
+            try {
+                display.shutdown();
+            } catch (Exception e) {
+                // Ignore
+            }
+            display = null;
         }
 
         // Shut down display
-        try {
-            oledDriver.shutdown();
-        } catch (Exception e) {
-            // Ignore
+        if (oledDriver != null) {
+            try {
+                oledDriver.shutdown();
+            } catch (Exception e) {
+                // Ignore
+            }
+            oledDriver = null;
+        }
+
+        // Shut down I2C devices
+        if (i2cDevices != null) {
+            for (var dev : new ArrayList<>(i2cDevices)) {
+                dev.shutdown();
+            }
+            i2cDevices = null;
+        }
+
+        // Remove all GPIO button listeners
+        if (hwButtons != null) {
+            for (HWButton b : hwButtons) {
+                if (b.digitalInput != null) {
+                    try {
+                        b.removeAllListeners();
+                    } catch (Exception e) {
+                        // Ignore
+                    }
+                    b.digitalInput = null;
+                }
+            }
+        }
+
+        // Shut down Pi4J
+        if (pi4j != null) {
+            try {
+                pi4j.shutdown();
+            } catch (LifecycleException e) {
+                // Ignore
+            }
+            pi4j = null;
         }
     }
 }

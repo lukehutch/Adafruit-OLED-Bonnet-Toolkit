@@ -224,6 +224,7 @@ public abstract class Screen {
 
     /** A button was pressed. */
     public static void buttonPressed(HWButton button, boolean down) {
+        // System.out.println(button + (down ? " pressed" : " released"));
         if (button == HWButton.C && down) {
             Str.lang = (Str.lang + 1) % 3; // @@TODO temp
             repaint();

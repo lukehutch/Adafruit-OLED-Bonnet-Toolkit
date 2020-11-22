@@ -31,23 +31,72 @@
  */
 package aobtk.hw;
 
-import com.pi4j.io.gpio.GpioPinDigitalInput;
-import com.pi4j.io.gpio.Pin;
-import com.pi4j.io.gpio.RaspiPin;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedDeque;
+
+import com.pi4j.exception.ShutdownException;
+import com.pi4j.io.gpio.digital.DigitalInput;
+import com.pi4j.io.gpio.digital.DigitalStateChangeListener;
+import com.pi4j.io.gpio.digital.PullResistance;
 
 public enum HWButton {
-    A(RaspiPin.GPIO_21), B(RaspiPin.GPIO_22), L(RaspiPin.GPIO_02), R(RaspiPin.GPIO_04), U(RaspiPin.GPIO_00),
-    D(RaspiPin.GPIO_03), C(RaspiPin.GPIO_07);
+    //    // For RPi Zero, with Pi4J v1:
+    //    A(21), B(22), L(2), R(4), U(0), D(3), C(7);
 
-    Pin pin;
-    GpioPinDigitalInput digitalInput;
+    // For RPi 4B, with Pi4J v2:
+    C(04), A(5), B(6), U(17), R(23), L(27), D(22);
+
+    DigitalInput digitalInput;
+
+    private Queue<DigitalStateChangeListener> listeners = new ConcurrentLinkedDeque<>();
+    private DigitalStateChangeListener metaListener;
+    private boolean isShutDown;
 
     /** Test whether a given button is currently down. */
     public boolean isDown() {
         return Bonnet.buttonDownMap.getOrDefault(this, Boolean.FALSE);
     }
 
-    HWButton(Pin pin) {
-        this.pin = pin;
+    HWButton(int pin) {
+        try {
+            digitalInput = Bonnet.pi4j.create(DigitalInput.newConfigBuilder(Bonnet.pi4j).id("gpio-pin-" + pin)
+                    .name("Pin #" + pin).address(pin).pull(PullResistance.PULL_UP).build());
+        } catch (Exception e) {
+            throw new RuntimeException("Could not set up digital input " + pin, e);
+        }
+        metaListener = e -> {
+            if (!isShutDown) {
+                for (var listener : listeners) {
+                    listener.onDigitalStateChange(e);
+                }
+            }
+        };
+        digitalInput.addListener(metaListener);
+    }
+
+    public void addListener(DigitalStateChangeListener listener) {
+        listeners.add(listener);
+    }
+
+    public void removeListener(DigitalStateChangeListener listener) {
+        listeners.remove(listener);
+    }
+
+    public void removeAllListeners() {
+        listeners.clear();
+    }
+
+    public void shutdown() {
+        removeAllListeners();
+        if (digitalInput != null) {
+            digitalInput.removeListener(metaListener);
+            try {
+                digitalInput.shutdown(Bonnet.pi4j);
+                isShutDown = true;
+            } catch (ShutdownException e) {
+                // Ignore
+            }
+            metaListener = null;
+        }
     }
 }
