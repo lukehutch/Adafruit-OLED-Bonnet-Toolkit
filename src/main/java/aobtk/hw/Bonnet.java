@@ -43,11 +43,7 @@ import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
 import com.pi4j.exception.LifecycleException;
 import com.pi4j.exception.Pi4JException;
-import com.pi4j.io.gpio.digital.DigitalInput;
 import com.pi4j.io.gpio.digital.DigitalState;
-import com.pi4j.io.gpio.digital.DigitalStateChangeEvent;
-import com.pi4j.io.gpio.digital.DigitalStateChangeListener;
-import com.pi4j.io.gpio.digital.PullResistance;
 
 import aobtk.oled.Display;
 import aobtk.oled.OLEDDriver;
@@ -97,25 +93,6 @@ public class Bonnet {
             System.exit(1);
         }
         
-
-//        for (int pin = 0; pin < 31; pin++) {
-//            try {
-//                int pinNum = pin;
-//                DigitalInput digitalInput = Bonnet.pi4j
-//                        .create(DigitalInput.newConfigBuilder(Bonnet.pi4j).id("gpio-pin-" + pin).name("Pin #" + pin)
-//                                .address(pin).pull(PullResistance.PULL_UP).build());
-//                digitalInput.addListener(new DigitalStateChangeListener() {
-//                    @Override
-//                    public void onDigitalStateChange(DigitalStateChangeEvent event) {
-//                        System.out.println("GPIO pin " + pinNum + " state change");
-//                    }
-//                });
-//            } catch (Exception e) {
-//                System.err.println("Could not set up digital input " + pin + ": " + e);
-//            }
-//        }
-
-
         // Wire up buttons to listener
         for (HWButton button : HWButton.values()) {
             // Register gpio pin listener
