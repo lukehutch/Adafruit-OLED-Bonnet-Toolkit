@@ -33,6 +33,7 @@ package aobtk.util;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
@@ -228,7 +229,7 @@ public class TaskExecutor {
          * {@link TaskResult} will pass the result of this {@link TaskResult} to the {@link CallableFunction}, and
          * will return the result of the {@link CallableFunction}.
          *
-         * @param                      <U> the return type
+         * @param <U>                  the return type
          * @param nextCallableFunction the {@link CallableFunction} to schedule after this {@link TaskResult} has
          *                             run.
          * @return the {@link TaskResult} that wraps nextCallable.
@@ -278,7 +279,7 @@ public class TaskExecutor {
          * {@link TaskResult} will drop the result of this {@link TaskResult} and will return the result of the
          * passed {@link Callable}.
          *
-         * @param              <U> the return type
+         * @param <U>          the return type
          * @param nextCallable the {@link Callable} to schedule after this {@link TaskResult} has run.
          * @return the {@link TaskResult} that wraps nextCallable.
          * @throws ExecutionException   if either this {@link TaskResult} or the scheduled {@link Callable} throws
@@ -313,7 +314,7 @@ public class TaskExecutor {
          * {@link TaskResult} will pass the result of this {@link TaskResult} to the {@link CallableFunction}, and
          * will return the result of the {@link CallableFunction}.
          *
-         * @param                      <U> the return type
+         * @param <U>                  the return type
          * @param nextRunnableConsumer the {@link CallableFunction} to schedule after this {@link TaskResult} has
          *                             run.
          * @return the {@link TaskResult} that wraps nextCallable.
@@ -388,7 +389,7 @@ public class TaskExecutor {
     /**
      * Submit a {@link Callable} for execution.
      *
-     * @param          <T> the result type.
+     * @param <T>      the result type.
      * @param callable the {@link Callable}.
      * @return the {@link TaskResult}.
      */
@@ -406,6 +407,18 @@ public class TaskExecutor {
         return new TaskResult<Void>(() -> {
             runnable.run();
             return null;
+        });
+    }
+
+    /**
+     * Submit a commandline command for execution.
+     *
+     * @param runnable the {@link Runnable}.
+     * @return the {@link TaskResult}, which contains the lines of outptu from the command.
+     */
+    public TaskResult<List<String>> submitCommand(String... commandAndArgs) {
+        return new TaskResult<List<String>>(() -> {
+            return Command.command(commandAndArgs);
         });
     }
 

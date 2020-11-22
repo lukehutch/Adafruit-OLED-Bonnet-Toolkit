@@ -196,7 +196,7 @@ public class Command {
         return result;
     }
 
-    public static List<String> command(String[] cmd)
+    public static List<String> command(String... cmd)
             throws CommandException, InterruptedException, CancellationException {
         return command(cmd, CMD_EXECUTOR);
     }
