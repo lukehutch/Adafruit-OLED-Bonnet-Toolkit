@@ -36,6 +36,9 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -48,10 +51,16 @@ import com.pi4j.io.gpio.digital.DigitalState;
 import aobtk.oled.Display;
 import aobtk.oled.OLEDDriver;
 import aobtk.ui.screen.Screen;
-import aobtk.util.TaskExecutor;
 
 public class Bonnet {
     private static final Logger LOGGER = Logger.getLogger(Bonnet.class.getCanonicalName());
+
+    /** Start new threads in daemon mode so they are killed when JVM tries to shut down. */
+    public static ExecutorService executor = Executors.newCachedThreadPool(r -> {
+        Thread t = new Thread(r);
+        t.setDaemon(true);
+        return t;
+    });
 
     // Initialize the class -- for some reason a static initializer block is never called (JDK bug?)
     @SuppressWarnings("unused")
@@ -109,6 +118,7 @@ public class Bonnet {
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
+                System.out.println("Bonnet shutdown hook");
                 shutdown();
             }
         });
@@ -120,17 +130,21 @@ public class Bonnet {
     }
 
     public static void shutdown() {
-        LOGGER.log(Level.INFO, "Shutting down");
+        LOGGER.log(Level.INFO, "Shutting down OLED Bonnet");
 
-        // Shut down all task executors
-        TaskExecutor.shutdownAll();
-
-        // Stop writing to display before shutting down the display hardware
+        executor.shutdownNow();
+        try {
+            executor.awaitTermination(3, TimeUnit.SECONDS);
+        } catch (InterruptedException e1) {
+            // Ignore
+        }
+        
+        // Shut down display driver
         if (display != null) {
             try {
                 display.shutdown();
             } catch (Exception e) {
-                // Ignore
+                e.printStackTrace();
             }
             display = null;
         }
@@ -140,7 +154,7 @@ public class Bonnet {
             try {
                 oledDriver.shutdown();
             } catch (Exception e) {
-                // Ignore
+                e.printStackTrace();
             }
             oledDriver = null;
         }
@@ -160,7 +174,7 @@ public class Bonnet {
                     try {
                         b.removeAllListeners();
                     } catch (Exception e) {
-                        // Ignore
+                        e.printStackTrace();
                     }
                     b.digitalInput = null;
                 }
@@ -172,7 +186,7 @@ public class Bonnet {
             try {
                 pi4j.shutdown();
             } catch (LifecycleException e) {
-                // Ignore
+                e.printStackTrace();
             }
             pi4j = null;
         }

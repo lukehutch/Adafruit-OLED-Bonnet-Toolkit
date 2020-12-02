@@ -118,6 +118,8 @@ public class OLEDDriver {
     private static final byte SSD1306_EXTERNALVCC = (byte) 0x1;
     private static final byte SSD1306_SWITCHCAPVCC = (byte) 0x2;
 
+    private boolean shutdown = false;
+
     private static final Logger LOGGER = Logger.getLogger(OLEDDriver.class.getCanonicalName());
 
     /**
@@ -161,11 +163,19 @@ public class OLEDDriver {
         update(BLANK_BUFFER);
     }
 
-    private void writeCommand(byte cmd) throws IOException {
-        i2cDev.writeRegister(0x00, cmd);
+    private synchronized void writeCommand(byte cmd) throws IOException {
+        if (!shutdown) {
+            i2cDev.writeRegister(0x00, cmd);
+        }
     }
 
-    private void switchOn() throws IOException {
+    private synchronized void writeRegister(int register, byte[] bytes, int start, int length) throws IOException {
+        if (!shutdown) {
+            i2cDev.writeRegister(register, bytes, start, length);
+        }
+    }
+
+    private synchronized void switchOn() throws IOException {
         writeCommand(SSD1306_DISPLAYOFF); // 0xAE
         writeCommand(SSD1306_SETDISPLAYCLOCKDIV); // 0xD5
         writeCommand((byte) 0x80); // the suggested ratio 0x80
@@ -196,7 +206,7 @@ public class OLEDDriver {
         writeCommand(SSD1306_DISPLAYON); // -- turn on OLED panel
     }
 
-    private void switchOff() throws IOException {
+    private synchronized void switchOff() throws IOException {
         clear();
         writeCommand(SSD1306_DISPLAYOFF); // -- turn off OLED panel
     }
@@ -219,18 +229,23 @@ public class OLEDDriver {
         writeCommand((byte) 0); // Page start address (0 = reset)
         writeCommand((byte) 7); // Page end address
 
+        // Send display contents in 16 byte chunks
         for (int i = 0; i < ((DISPLAY_WIDTH * DISPLAY_HEIGHT / 8) / 16); i++) {
-            // send a bunch of data in one transmission
-            i2cDev.writeRegister(0x40, imageBuffer, i * 16, 16);
+            writeRegister(0x40, imageBuffer, i * 16, 16);
         }
     }
 
     public synchronized void shutdown() {
-        try {
-            // before we shut down we clear the display and switch it off
-            switchOff();
-        } catch (IOException e) {
-            LOGGER.log(Level.FINE, "Exception closing i2c bus", e);
+        if (!shutdown) {
+            LOGGER.log(Level.INFO, "Shutting down OLED driver");
+            try {
+                // before we shut down we clear the display and switch it off
+                switchOff();
+                LOGGER.log(Level.INFO, "Switched off OLED panel");
+            } catch (IOException e) {
+                LOGGER.log(Level.FINE, "Exception closing i2c bus", e);
+            }
+            shutdown = true;
         }
     }
 }

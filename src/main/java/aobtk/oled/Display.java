@@ -53,8 +53,6 @@ public class Display {
 
     private final OLEDDriver driver;
 
-    private volatile boolean shutdown;
-
     public Display(OLEDDriver driver) {
         this.driver = driver;
     }
@@ -163,13 +161,15 @@ public class Display {
                 }
             }
         }
-        if (!shutdown) {
-            // Update display
-            driver.update(bitBuffer);
-        }
+        // Update display
+        driver.update(bitBuffer);
     }
 
     public void shutdown() {
-        this.shutdown = true;
+        clear();
+        try {
+            update();
+        } catch (IOException e) {
+        }
     }
 }

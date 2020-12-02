@@ -32,6 +32,13 @@
 package aobtk.ui.screen;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 
 import aobtk.hw.Bonnet;
@@ -39,8 +46,6 @@ import aobtk.hw.HWButton;
 import aobtk.i18n.Str;
 import aobtk.oled.Display;
 import aobtk.ui.element.UIElement;
-import aobtk.util.TaskExecutor;
-import aobtk.util.TaskExecutor.TaskResult;
 
 public abstract class Screen {
     /** The current screen. */
@@ -55,9 +60,6 @@ public abstract class Screen {
     /** The screen needs to be repainted */
     private static Semaphore repaint = new Semaphore(1);
 
-    /** Every screen gets its own ThreadExecutor */
-    protected final TaskExecutor taskExecutor = new TaskExecutor();
-
     /** The current UI. */
     private UIElement ui;
 
@@ -67,51 +69,115 @@ public abstract class Screen {
      */
     protected static final Object uiLock = new Object();
 
+    /** A set of possibly-active tasks, to allow all active tasks to be canceled. */
+    private static Set<Future<?>> possiblyActiveTasks = Collections
+            .newSetFromMap(new ConcurrentHashMap<Future<?>, Boolean>());
+
     /** Start the screen repaint thread. */
     public static void init(Screen rootScreen) {
         // Only one display is supported currently
         Display display = Bonnet.display;
-        new TaskExecutor().submit(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    try {
-                        // Block until one or more repaint requests have been queued.
-                        // Get all available permits in case multiple repaints have been scheduled
-                        // since the last repaint.
-                        repaint.acquire(Math.max(1, repaint.availablePermits()));
 
-                        // Hold currScreenLock so that currScreen doesn't change while rendering
-                        synchronized (currScreenLock) {
-                            if (currScreen != null) {
-                                // Hold the UI lock so UI doesn't change while rendering
-                                synchronized (uiLock) {
-                                    // Clear the display buffer
-                                    display.clear();
+        // Start the repaint thread
+        Bonnet.executor.submit(() -> {
+            while (true) {
+                // Block until one or more repaint requests have been queued.
+                // Get all available permits in case multiple repaints have been scheduled
+                // since the last repaint.
+                repaint.acquire(Math.max(1, repaint.availablePermits()));
 
-                                    // Render the UI into the display buffer
-                                    if (currScreen.ui != null) {
-                                        currScreen.ui.render(display);
-                                    }
+                // Hold currScreenLock so that currScreen doesn't change while rendering
+                synchronized (currScreenLock) {
+                    if (currScreen != null) {
+                        // Hold the UI lock so UI doesn't change while rendering
+                        synchronized (uiLock) {
+                            // Clear the display buffer
+                            display.clear();
 
-                                    // Update the display with the contents of the display buffer
-                                    try {
-                                        display.update();
-                                    } catch (IOException e) {
-                                        // Probably happened because finalizer ran before this thread was killed
-                                        System.out.println("Failed to update display");
-                                        e.printStackTrace();
-                                    }
-                                }
+                            // Render the UI into the display buffer
+                            if (currScreen.ui != null) {
+                                currScreen.ui.render(display);
+                            }
+
+                            // Update the display with the contents of the display buffer
+                            try {
+                                display.update();
+                            } catch (IOException e1) {
+                                // Probably happened because finalizer ran before this thread was killed
+                                System.out.println("Failed to update display");
+                                e1.printStackTrace();
                             }
                         }
-                    } catch (InterruptedException e) {
-                        break;
                     }
                 }
             }
         });
+
+        // Start the completed task cleaner thread
+        Bonnet.executor.submit(() -> {
+            List<Future<?>> completedTasks = new ArrayList<>();
+            while (true) {
+                Thread.sleep(1000);
+
+                for (Future<?> task : possiblyActiveTasks) {
+                    if (task.isCancelled() || task.isDone()) {
+                        completedTasks.add(task);
+                    }
+                }
+                if (!completedTasks.isEmpty()) {
+                    possiblyActiveTasks.removeAll(completedTasks);
+                    completedTasks.clear();
+                }
+            }
+        });
+
         setCurrScreen(rootScreen);
+    }
+
+    /** Cancel all tasks that have not yet been canceled or completed. */
+    public static void cancelAllPendingTasks() {
+        for (Future<?> task : possiblyActiveTasks) {
+            task.cancel(true);
+            possiblyActiveTasks.remove(task);
+        }
+    }
+
+    /** Schedule a task to run immediately. */
+    public static Future<?> runTask(Runnable runnable) {
+        Future<?> task = Bonnet.executor.submit(() -> {
+            runnable.run();
+            return null;
+        });
+        possiblyActiveTasks.add(task);
+        return task;
+    }
+
+    /** Schedule a task to run immediately. */
+    public static <T> Future<T> runTask(Callable<T> callable) {
+        Future<T> task = Bonnet.executor.submit(callable);
+        possiblyActiveTasks.add(task);
+        return task;
+    }
+
+    /** Schedule a task to run after a delay. */
+    public static <T> Future<T> scheduleTaskAfterDelay(int delayMillis, Callable<T> callable) {
+        Future<T> task = Bonnet.executor.submit(() -> {
+            Thread.sleep(delayMillis);
+            return callable.call();
+        });
+        possiblyActiveTasks.add(task);
+        return task;
+    }
+
+    /** Schedule a task to run after a delay. */
+    public static Future<?> scheduleTaskAfterDelay(int delayMillis, Runnable runnable) {
+        Future<?> task = Bonnet.executor.submit(() -> {
+            Thread.sleep(delayMillis);
+            runnable.run();
+            return null;
+        });
+        possiblyActiveTasks.add(task);
+        return task;
     }
 
     /** Set the UI, then call {@link #repaint()}. */
@@ -156,7 +222,7 @@ public abstract class Screen {
                             currScreen.close();
 
                             // Cancel any pending jobs in current screen that currScreen.close() did not cancel
-                            currScreen.taskExecutor.cancelAllPendingJobs();
+                            cancelAllPendingTasks();
                         }
                     }
 
@@ -183,12 +249,12 @@ public abstract class Screen {
 
     /**
      * Schedule a wait, then schedule a call to {@link #setCurrScreen(Screen)}. Cancel the returned
-     * {@link TaskResult} to cancel the wait.
+     * {@link Future} to cancel the wait.
      * 
-     * @return the scheduled {@link TaskResult}.
+     * @return the scheduled {@link Future}.
      */
-    public TaskResult<Void> waitThenSetCurrScreen(int milliseconds, Screen newCurrScreen) {
-        return currScreen.taskExecutor.submitWait(milliseconds).then(() -> {
+    public Future<?> waitThenSetCurrScreen(int milliseconds, Screen newCurrScreen) {
+        return scheduleTaskAfterDelay(milliseconds, () -> {
             synchronized (currScreenLock) {
                 // Check currScreen has not changed while waiting
                 if (currScreen == Screen.this && newCurrScreen != null) {
@@ -198,8 +264,8 @@ public abstract class Screen {
         });
     }
 
-    public TaskResult<Void> waitThenGoToParentScreen(int milliseconds) {
-        return currScreen.taskExecutor.submitWait(milliseconds).then(() -> {
+    public Future<?> waitThenGoToParentScreen(int milliseconds) {
+        return scheduleTaskAfterDelay(milliseconds, () -> {
             synchronized (currScreenLock) {
                 // Check currScreen has not changed while waiting
                 if (currScreen == Screen.this && currScreen.parentScreen != null) {
