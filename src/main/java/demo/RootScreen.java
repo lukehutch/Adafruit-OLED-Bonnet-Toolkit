@@ -56,9 +56,11 @@ public class RootScreen extends Screen {
         switch (button) {
         case L:
             menu.decSelectedIdx();
+            repaint();
             break;
         case R:
             menu.incSelectedIdx();
+            repaint();
             break;
         case C:
         case B:

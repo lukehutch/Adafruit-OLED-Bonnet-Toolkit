@@ -239,15 +239,14 @@ public abstract class Screen {
 
             } else if (down) {
                 // Only send button down events to current screen
-                if (button == HWButton.A && !currScreen.acceptsButtonA()) {
+                if (button == HWButton.A && !currScr.acceptsButtonA()) {
                     // Button A goes back up to parent (works as Cancel) unless accepted by Screen instance
-                    currScreen.goToParentScreen();
+                    currScr.goToParentScreen();
                 } else {
                     // Other button
-                    currScreen.buttonDown(button);
+                    currScr.buttonDown(button);
                 }
             }
-            currScr.repaint();
         }
     }
 
