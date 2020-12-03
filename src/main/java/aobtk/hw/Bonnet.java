@@ -31,14 +31,19 @@
  */
 package aobtk.hw;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -50,6 +55,7 @@ import com.pi4j.io.gpio.digital.DigitalState;
 
 import aobtk.oled.Display;
 import aobtk.oled.OLEDDriver;
+import aobtk.ui.element.UIElement;
 import aobtk.ui.screen.Screen;
 
 public class Bonnet {
@@ -61,6 +67,8 @@ public class Bonnet {
         t.setDaemon(true);
         return t;
     });
+
+    private static ExecutorService uiTaskExecutor = Executors.newSingleThreadExecutor();
 
     // Initialize the class -- for some reason a static initializer block is never called (JDK bug?)
     @SuppressWarnings("unused")
@@ -75,8 +83,9 @@ public class Bonnet {
 
     static Set<I2CDevice> i2cDevices = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
-    public static OLEDDriver oledDriver = new OLEDDriver();
-    public static Display display = new Display(oledDriver);
+    private static Queue<Display> displayRecycler = new ConcurrentLinkedQueue<>();
+    private static byte[] displayBitBuffer = Display.newBitBuffer();
+    private static OLEDDriver oledDriver = new OLEDDriver();
 
     private Bonnet() {
         System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "TRACE");
@@ -101,7 +110,7 @@ public class Bonnet {
             shutdown();
             System.exit(1);
         }
-        
+
         // Wire up buttons to listener
         for (HWButton button : HWButton.values()) {
             // Register gpio pin listener
@@ -124,6 +133,70 @@ public class Bonnet {
         });
     }
 
+    /** Get a recycled {@link Display} object, or allocate a new one. */
+    private static Display getRecycledOrNewDisplay() {
+        Display display = displayRecycler.poll();
+        if (display == null) {
+            display = new Display();
+        }
+        display.clear();
+        return display;
+    }
+
+    /** Recycle the Display object (unless the recycle queue is large -- then just rely on GC). */
+    private static void recycle(Display display) {
+        if (displayRecycler.size() < 100) {
+            displayRecycler.add(display);
+        }
+    }
+
+    /** Render a UI (or pass in null to clear the display). */
+    public static Display render(UIElement ui) {
+        // Take a visual snapshot of the current UI state using a Display object
+        Display display = getRecycledOrNewDisplay();
+        if (ui != null) {
+            ui.render(display);
+        }
+        return display;
+    }
+
+    /** Render a bitbuffer. */
+    public static Display render(byte[] bitBuffer) {
+        Display display = getRecycledOrNewDisplay();
+        display.setFromBitBuffer(bitBuffer);
+        return display;
+    }
+
+    /**
+     * Schedule the Display object for sending to the OLED panel, if the condition is true right before the draw is
+     * about to happen.
+     */
+    public static void scheduleDrawIf(Display display, Supplier<Boolean> cond) {
+        uiTaskExecutor.submit(() -> {
+            if (cond.get()) {
+                display.writeToBitBuffer(displayBitBuffer);
+                if (oledDriver != null) {
+                    try {
+                        oledDriver.update(displayBitBuffer);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            recycle(display);
+        });
+    }
+
+    /** Schedule the Display object for sending to the OLED panel. */
+    public static void scheduleDraw(Display display) {
+        scheduleDrawIf(display, () -> true);
+    }
+
+    /** Run a task on the UI thread. */
+    public static void runOnUIThread(Runnable runnable) {
+        uiTaskExecutor.submit(runnable);
+    }
+
     public static I2CDevice openI2CDevice(int busNum, int deviceAddr) {
         var i2cDevice = new I2CDevice(busNum, deviceAddr);
         return i2cDevice;
@@ -132,26 +205,29 @@ public class Bonnet {
     public static void shutdown() {
         LOGGER.log(Level.INFO, "Shutting down OLED Bonnet");
 
-        executor.shutdownNow();
+        executor.shutdown();
         try {
             executor.awaitTermination(3, TimeUnit.SECONDS);
         } catch (InterruptedException e1) {
             // Ignore
         }
-        
-        // Shut down display driver
-        if (display != null) {
-            try {
-                display.shutdown();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            display = null;
+        executor.shutdownNow();
+
+        uiTaskExecutor.shutdown();
+        try {
+            uiTaskExecutor.awaitTermination(3, TimeUnit.SECONDS);
+        } catch (InterruptedException e1) {
+            // Ignore
         }
+        uiTaskExecutor.shutdownNow();
 
         // Shut down display
         if (oledDriver != null) {
             try {
+                // Clear display
+                Arrays.fill(displayBitBuffer, (byte) 0);
+                oledDriver.update(displayBitBuffer);
+                // Shut down display driver
                 oledDriver.shutdown();
             } catch (Exception e) {
                 e.printStackTrace();

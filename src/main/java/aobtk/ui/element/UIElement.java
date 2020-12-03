@@ -49,7 +49,7 @@ public abstract class UIElement {
 
     /** Measure the UI element, and cache the result to the {@link size} field. */
     protected abstract Size measure(int maxW, int maxH);
-
+    
     /** Lay out and render the UI element (must respect the {@link #hide} field}. */
     protected abstract void render(int x, int y, int maxW, int maxH, Display display);
     

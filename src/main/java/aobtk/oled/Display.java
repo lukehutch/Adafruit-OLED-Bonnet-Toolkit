@@ -31,7 +31,6 @@
  */
 package aobtk.oled;
 
-import java.io.IOException;
 import java.util.Arrays;
 
 import aobtk.font.FontStyle;
@@ -48,13 +47,9 @@ public class Display {
     /** Pixels to invert and add a dilated halo around. */
     private final byte[] invertBuffer = new byte[OLEDDriver.DISPLAY_WIDTH * OLEDDriver.DISPLAY_HEIGHT];
 
-    /** The buffer that is actually sent to the display on {@link Display#update()}. */
-    private final byte[] bitBuffer = new byte[(OLEDDriver.DISPLAY_WIDTH * OLEDDriver.DISPLAY_HEIGHT) / 8];
-
-    private final OLEDDriver driver;
-
-    public Display(OLEDDriver driver) {
-        this.driver = driver;
+    /** Get a new bit buffer the size of the display. */
+    public static byte[] newBitBuffer() {
+        return new byte[(OLEDDriver.DISPLAY_WIDTH * OLEDDriver.DISPLAY_HEIGHT) / 8];
     }
 
     public synchronized void clear() {
@@ -86,6 +81,10 @@ public class Display {
         }
     }
 
+    public synchronized void setPixel(int x, int y, boolean drawWhite) {
+        setPixel(x, y, drawWhite, FontStyle.Highlight.NONE);
+    }
+
     public synchronized void invertBlock(int x, int y, int w, int h) {
         for (int yo = y, y1 = y + h; yo < y1; yo++) {
             for (int xo = x, x1 = x + w; xo < x1; xo++) {
@@ -95,10 +94,6 @@ public class Display {
                 }
             }
         }
-    }
-
-    public synchronized void setPixel(int x, int y, boolean drawWhite) {
-        setPixel(x, y, drawWhite, FontStyle.Highlight.NONE);
     }
 
     /** Set or clear all pixels in a rectangle. */
@@ -111,40 +106,7 @@ public class Display {
     }
 
     /** Get the screen contents as a bit buffer, 1bpp, in row major order. */
-    public byte[] getBitBuffer() {
-        try {
-            update();
-        } catch (IOException e) {
-        }
-        return bitBuffer;
-    }
-
-    /**
-     * Set the screen contents from a bit buffer.
-     * 
-     * @throws IOException
-     */
-    public void setFromBitBuffer(byte[] bitBuffer) throws IOException {
-        if (bitBuffer.length != OLEDDriver.DISPLAY_WIDTH * OLEDDriver.DISPLAY_HEIGHT / 8) {
-            throw new IllegalArgumentException("Bit buffer is wrong length");
-        }
-        for (int y = 0; y < OLEDDriver.DISPLAY_HEIGHT; y++) {
-            for (int x = 0; x < OLEDDriver.DISPLAY_WIDTH; x++) {
-                int addr = x + y * OLEDDriver.DISPLAY_WIDTH;
-                byte pix = (bitBuffer[x + (y >> 3) * OLEDDriver.DISPLAY_WIDTH] & (1 << (y & 0x07))) != 0 ? (byte) 1
-                        : (byte) 0;
-                pixBuffer[addr] = pix;
-            }
-        }
-        update();
-    }
-
-    /**
-     * Send the current buffer to the display.
-     * 
-     * @throws IOException
-     */
-    public void update() throws IOException {
+    public void writeToBitBuffer(byte[] bitBuffer) {
         Arrays.fill(bitBuffer, (byte) 0);
         for (int y = 0; y < OLEDDriver.DISPLAY_HEIGHT; y++) {
             for (int x = 0; x < OLEDDriver.DISPLAY_WIDTH; x++) {
@@ -161,15 +123,21 @@ public class Display {
                 }
             }
         }
-        // Update display
-        driver.update(bitBuffer);
     }
 
-    public void shutdown() {
-        clear();
-        try {
-            update();
-        } catch (IOException e) {
+    /** Set the display contents from a bit buffer. */
+    public void setFromBitBuffer(byte[] bitBuffer) {
+        if (bitBuffer.length != OLEDDriver.DISPLAY_WIDTH * OLEDDriver.DISPLAY_HEIGHT / 8) {
+            throw new IllegalArgumentException("Bit buffer is wrong length");
+        }
+        Arrays.fill(invertBuffer, (byte) 0);
+        for (int y = 0; y < OLEDDriver.DISPLAY_HEIGHT; y++) {
+            for (int x = 0; x < OLEDDriver.DISPLAY_WIDTH; x++) {
+                int addr = x + y * OLEDDriver.DISPLAY_WIDTH;
+                byte pix = (bitBuffer[x + (y >> 3) * OLEDDriver.DISPLAY_WIDTH] & (1 << (y & 0x07))) != 0 ? (byte) 1
+                        : (byte) 0;
+                pixBuffer[addr] = pix;
+            }
         }
     }
 }
